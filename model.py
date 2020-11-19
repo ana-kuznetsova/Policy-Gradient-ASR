@@ -19,7 +19,7 @@ class TrainData(data.Dataset):
             idx = idx.tolist()
         
         fname = os.path.join(self.aud_path, self.df['path'][idx])
-        transcript = self.df['sentence']
+        transcript = self.df['sentence'][idx]
 
         feat = self.transform(fname)
 
