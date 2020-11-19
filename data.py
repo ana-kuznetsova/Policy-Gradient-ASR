@@ -14,8 +14,8 @@ def make_feats(x_path, out_path):
         mfcc = torchaudio.transforms.MFCC()(waveform)
         print('mffc shape:', mfcc.shape)
         #Calculate delta and double-delta
-        #stft = torchaudio.transforms.Spectrogram()(waveform)
-        deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
+        stft = torchaudio.transforms.Spectrogram()(waveform)
+        deltas = torchaudio.transforms.ComputeDeltas()(stft)
         print('deltas:', deltas.shape)
         res = torch.column_stack((mfcc, deltas))
         torch.save(res, os.path.join(out_path, f.split('.')[0]+'.pt'))
