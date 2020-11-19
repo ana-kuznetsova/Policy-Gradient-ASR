@@ -16,6 +16,6 @@ def make_feats(x_path, out_path):
         #Calculate delta and double-delta
         deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
-        res = torch.stack((mfcc, deltas, ddeltas), dim=1)
+        res = torch.cat((mfcc, deltas, ddeltas), dim=1)
         print("res:", res.shape)
         torch.save(res, os.path.join(out_path, f.split('.')[0]+'.pt'))
