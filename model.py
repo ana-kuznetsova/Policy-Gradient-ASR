@@ -4,6 +4,7 @@ from data import make_feats
 import torch
 import torch.optim as optim
 import torch.utils.data as data
+import torch.nn as nn
 
 class TrainData(data.Dataset):
     def __init__(self, csv_path, aud_path, transform):
@@ -25,3 +26,12 @@ class TrainData(data.Dataset):
 
         sample = {'aud':feat, 'trans': transcript}
         return sample
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.input_layer = nn.Linear(120, 512)
+
+    def forward(self, x):
+        x = torch.nn.LeakyReLU(self.input_layer(x))
+        
