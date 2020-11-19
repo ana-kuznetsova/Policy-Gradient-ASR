@@ -19,4 +19,4 @@ def make_feats(x_path, out_path):
         #Normalize rows
         s = torch.sum(res, dim=2, keepdim=True)
         norm = torch.div(res, s)
-        torch.save(res, os.path.join(out_path, f.split('.')[0]+'.pt'))
+        torch.save(norm, os.path.join(out_path, f.split('.')[0]+'.pt'))
