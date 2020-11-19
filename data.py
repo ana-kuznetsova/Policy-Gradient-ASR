@@ -16,4 +16,5 @@ def make_feats(x_path, out_path):
         deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
         res = torch.cat((mfcc, deltas, ddeltas), dim=1)
+        print('tensor:', res)
         torch.save(res, os.path.join(out_path, f.split('.')[0]+'.pt'))
