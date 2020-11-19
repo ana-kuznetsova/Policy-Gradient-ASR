@@ -18,6 +18,3 @@ def make_feats(x_path, out_path):
         print('deltas:', deltas.shaoe)
         res = torch.column_stack((mfcc, deltas))
         torch.save(res, os.path.join(out_path, f.split('.')[0]+'.pt'))
-
-make_feats('/N/slate/anakuzne/Data/asr/policy_gradient/eu/clips', 
-           '/N/slate/anakuzne/Data/asr/policy_gradient/eu/eu_feats')
