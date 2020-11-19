@@ -7,7 +7,7 @@ import torch
 import torchaudio
 
 def make_feats(x_path, out_path):
-    files = os.listdir()
+    files = os.listdir(x_path)
     for f in files:
         waveform, sample_rate = torchaudio.load(os.path.join(x_path, f))
         #Calculate MFCC
