@@ -31,6 +31,7 @@ class TrainData(data.Dataset):
 ##Custom collate function to feed variable size batches
 def my_collate(batch):
     data = [torch.reshape(item["aud"], (item["aud"].shape[1], item["aud"].shape[2])) for item in batch]
+    data = [torch.transpose(item, 0, 1) for item in data]
     target = [item["trans"] for item in batch]
     data = torch.cat(data, dim=0)
     #print("data:", data[0].shape)
