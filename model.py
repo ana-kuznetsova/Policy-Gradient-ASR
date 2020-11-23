@@ -67,5 +67,5 @@ def train(num_epochs=50):
         loader = iter(loader)
         for batch in range(len(loader)):
             x, t = loader.next()
-            print(x[0].shape, t)
+            print(x.shape, t[:100])
         
