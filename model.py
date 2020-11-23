@@ -33,7 +33,6 @@ def my_collate(batch):
     data = [torch.transpose(item["aud"], dim0=0, dim1=2) for item in batch]
     target = [item["trans"] for item in batch]
     data = torch.cat(data, dim=0)
-    print("target", type(target[0]))
     return [data, target]
 
 
@@ -68,5 +67,5 @@ def train(num_epochs=50):
         loader = iter(loader)
         for batch in range(len(loader)):
             x, t = loader.next()
-            #print(x[0].shape)
+            print(x[0].shape, t)
         
