@@ -32,8 +32,8 @@ class TrainData(data.Dataset):
 def my_collate(batch):
     data = [item["aud"] for item in batch]
     target = [item["trans"] for item in batch]
-    data = torch.cat(data, dim=0)
-    print("data:", data.shape)
+    #data = torch.cat(data, dim=0)
+    print("data:", torch.transpose(data[0], dim0=0, dim1=2).shape)
     return [data, target]
 
 
