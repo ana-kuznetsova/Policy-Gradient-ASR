@@ -32,7 +32,8 @@ class TrainData(data.Dataset):
 def my_collate(batch):
     data = [item["aud"] for item in batch]
     target = [item["trans"] for item in batch]
-    target = torch.LongTensor(target)
+    print("data:", data[:3], "tar:", target[:3])
+    #target = torch.LongTensor(target)
     return [data, target]
 
 class Model(nn.Module):
