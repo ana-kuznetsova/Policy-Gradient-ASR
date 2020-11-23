@@ -64,5 +64,6 @@ def train(num_epochs=50):
     for ep in range(1, num_epochs+1):
         loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True, collate_fn=my_collate)
         loader = iter(loader)
-        x, t = loader.next()
-        print(x, t)
+
+        #x, t = loader.next()
+        print(len(loader))
