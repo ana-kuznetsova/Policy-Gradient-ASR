@@ -46,13 +46,13 @@ class Encoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.input_layer = nn.Linear(120, 512)
-        self.blstm = nn.LSTM(input_size=512, hidden_size=256, num_layers=3, bidirectional=True)
+        self.blstm = nn.LSTM(512, hidden_size=256, num_layers=3, bidirectional=True)
 
     def forward(self, x):
         x = self.input_layer(x)
         x = torch.nn.LeakyReLU(x)
         #x = self.blstm(x)
-        print(x.view())
+        print(x)
         return(x)
         
 
