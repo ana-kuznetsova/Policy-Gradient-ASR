@@ -30,9 +30,10 @@ class TrainData(data.Dataset):
 
 ##Custom collate function to feed variable size batches
 def my_collate(batch):
-    data = [torch.transpose(item["aud"], dim0=0, dim1=2) for item in batch]
+    data = [torch.reshape(item["aud"], (item["aud"].shape[1], item["aud"].shape[2])) for item in batch]
     target = [item["trans"] for item in batch]
-    data = torch.cat(data, dim=0)
+    #data = torch.cat(data, dim=0)
+    print("data:", data[0].shape)
     return [data, target]
 
 
