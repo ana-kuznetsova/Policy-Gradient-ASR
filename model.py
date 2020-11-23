@@ -30,9 +30,8 @@ class TrainData(data.Dataset):
 
 ##Custom collate function to feed variable size batches
 def my_collate(batch):
-    print('batch:', batch)
-    data = [item[0] for item in batch]
-    target = [item[1] for item in batch]
+    data = [item["aud"] for item in batch]
+    target = [item["trans"] for item in batch]
     target = torch.LongTensor(target)
     return [data, target]
 
