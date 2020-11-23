@@ -14,5 +14,5 @@ if __name__ == "__main__":
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True, 
                              collate_fn=my_collate)
     for x, t in loader:
-        print(type(x), len(x))
+        print(type(x[0]), len(x[0]))
         
