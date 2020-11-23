@@ -52,7 +52,7 @@ class Encoder(nn.Module):
         x = self.input_layer(x)
         x = torch.nn.LeakyReLU(x)
         #x = self.blstm(x)
-        print(x.size)
+        print(x.view())
         return(x)
         
 
