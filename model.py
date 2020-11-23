@@ -32,7 +32,7 @@ class TrainData(data.Dataset):
 def my_collate(batch):
     data = [torch.transpose(item["aud"], dim0=0, dim1=2) for item in batch]
     target = [item["trans"] for item in batch]
-    data = torch.cat(data, dim=0)
+    #data = torch.cat(data, dim=0)
     return [data, target]
 
 
@@ -67,5 +67,5 @@ def train(num_epochs=50):
         loader = iter(loader)
         for batch in range(len(loader)):
             x, t = loader.next()
-            print(x.shape, t[:100])
+            print(x.shape, len(t))
         
