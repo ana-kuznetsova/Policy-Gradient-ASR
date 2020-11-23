@@ -34,7 +34,6 @@ def my_collate(batch):
     data = [torch.transpose(item, 0, 1) for item in data]
     target = [item["trans"] for item in batch]
     data = torch.cat(data, dim=0)
-    print("data:", data.shape)
     return [data, target]
 
 
@@ -50,6 +49,7 @@ class Encoder(nn.Module):
 
     def forward(self, x):
         x = torch.nn.LeakyReLU(self.input_layer(x))
+        return(x)
         
 
 def train(num_epochs=50):
