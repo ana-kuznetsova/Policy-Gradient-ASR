@@ -69,6 +69,7 @@ def train(num_epochs=50):
         loader = iter(loader)
         for batch in range(len(loader)):
             x, t = loader.next()
+            x = x.to(device)
             out = encoder(x)
             print(out)
         
