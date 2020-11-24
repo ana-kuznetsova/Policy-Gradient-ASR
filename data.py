@@ -21,7 +21,7 @@ def make_feats(path):
 def find_maxlen(path):
     fnames = os.listdir(path)
     maxlen = 0
-    for n in fnames:
+    for n in tqdm(fnames):
         waveform, sample_rate = torchaudio.load(os.path.join(path, n))
         mfcc = torchaudio.transforms.MFCC()(waveform)
         size = mfcc.shape[2]
