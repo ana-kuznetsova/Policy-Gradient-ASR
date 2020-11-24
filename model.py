@@ -22,20 +22,10 @@ class TrainData(data.Dataset):
         fname = os.path.join(self.aud_path, self.df['path'][idx])
         transcript = self.df['sentence'][idx]
 
-        feat = self.transform(fname)
+        feat, mask = self.transform(fname)
 
-        sample = {'aud':feat, 'trans': transcript}
+        sample = {'aud':feat, 'trans': transcript, 'mask':mask}
         return sample
-
-
-##Custom collate function to feed variable size batches
-def my_collate(batch):
-    data = [torch.reshape(item["aud"], (item["aud"].shape[1], item["aud"].shape[2])) for item in batch]
-    data = [torch.transpose(item, 0, 1) for item in data]
-    target = [item["trans"] for item in batch]
-    data = torch.cat(data, dim=0)
-    return [data, target]
-
 
 def weights(m):
     if isinstance(m,nn.Linear):
@@ -71,12 +61,6 @@ def train(num_epochs=50):
     cv_dataset = TrainData('/N/slate/anakuzne/Data/asr/policy_gradient/eu/train.tsv',
                             '/N/slate/anakuzne/Data/asr/policy_gradient/eu/clips', make_feats)
 
-    for ep in range(1, num_epochs+1):
-        loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True, collate_fn=my_collate)
-        loader = iter(loader)
-        for batch in range(len(loader)):
-            x, t = loader.next()
-            x = x.to(device)
-            out = encoder(x)
-            print(out)
+    loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
+    print("Loader", len(loader))
         

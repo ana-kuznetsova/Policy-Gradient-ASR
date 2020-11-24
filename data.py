@@ -4,7 +4,7 @@ import torch
 import torchaudio
 from tqdm import tqdm
 
-def make_feats(path):
+def make_feats(path, maxlen=4799):
     waveform, sample_rate = torchaudio.load(path)
     #Calculate MFCC
     mfcc = torchaudio.transforms.MFCC()(waveform)
@@ -15,7 +15,11 @@ def make_feats(path):
     #Normalize rows
     s = torch.sum(res, dim=2, keepdim=True)
     norm = torch.div(res, s)
-    return norm
+    mask = torch.ones(norm.shape[0], norm.shape[1])
+    padding = torch.nn.ZeroPad2d((0, maxlen-norm.shape[1], 0, 0))
+    norm = padding(norm)
+    mask = padding(mask)
+    return norm, mask
 
 
 def find_maxlen(path):
