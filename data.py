@@ -24,7 +24,7 @@ def find_maxlen(path):
     for n in fnames:
         waveform, sample_rate = torchaudio.load(os.path.join(path, n))
         mfcc = torchaudio.transforms.MFCC()(waveform)
-        size = mfcc.size[2]
+        size = mfcc.shape[2]
         if size > maxlen:
             maxlen = size
-    print("Maxlen:",maxlen )
+    print("Maxlen:", maxlen)
