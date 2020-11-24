@@ -58,8 +58,8 @@ def train(num_epochs=50):
     encoder.cuda()
     encoder = encoder.to(device)
 
-    cv_dataset = TrainData('/N/slate/anakuzne/Data/asr/policy_gradient/eu/train.tsv',
-                            '/N/slate/anakuzne/Data/asr/policy_gradient/eu/clips', make_feats)
+    cv_dataset = TrainData('/nfs/nfs5/home/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                            '/nfs/nfs5/home/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips', make_feats)
 
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
     print("Loader", len(loader))
