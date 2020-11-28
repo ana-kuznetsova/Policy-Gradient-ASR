@@ -150,3 +150,18 @@ def train(csv_path, aud_path, alphabet_path, char2ind):
 
     cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
+
+    for batch in loader:
+        x = batch['aud'].to(device)
+        t = batch['trans'].to(device)
+        fmask = batch['fmask'].squeeze(1)
+        tmask = batch['tmask'].squeeze(1)
+        preds = model(x)
+        input_length = torch.sum(fmask, dim =1).long()
+        target_length = torch.sum(tmask, dim=1).long()
+        optimizer.zero_grad()
+        loss = criterion(preds, t, input_length, target_length)
+        print(loss.detach().cpu().numpy())
+        loss.backward(retain_graph=True)
+        optimizer.step()
+        print("----------------------------------------------------")
