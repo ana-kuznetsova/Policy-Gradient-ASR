@@ -82,7 +82,6 @@ class Attention(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, batch_size):
         super().__init__()
-        self.char2ind = char2ind
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
@@ -138,7 +137,11 @@ def collapse_fn(preds, masks):
         
     return torch.tensor(res)
         
-def train(csv_path, aud_path, alphabet_path, char2ind):
+def train(csv_path, aud_path, alphabet_path):
+
+    with open(alphabet_path, 'r') as fo:
+        alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
+    char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(32)
