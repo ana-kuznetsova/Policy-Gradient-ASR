@@ -159,7 +159,7 @@ def train(csv_path, aud_path, alphabet_path):
         tmask = batch['tmask'].squeeze(1).to(device)
         h0 = torch.zeros(3*2, 32, 256)
         c0 = torch.zeros(3*2, 32, 256)
-        preds = model(x)
+        preds = model(x, h0, c0)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
         optimizer.zero_grad()
