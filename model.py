@@ -50,9 +50,7 @@ class Encoder(nn.Module):
                              bidirectional=True)
         self.batch_size = batch_size
         
-    def forward(self, x):
-        h0 = torch.zeros(3*2, self.batch_size, 256)
-        c0 = torch.zeros(3*2, self.batch_size, 256)
+    def forward(self, x, h0, c0):
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -108,8 +106,8 @@ class Seq2Seq(nn.Module):
         super().__init__()
         self.encoder = Encoder(batch_size)
         self.decoder = Decoder(batch_size)
-    def forward(self, batch):
-        enc_out, (he, ce) = self.encoder(batch)
+    def forward(self, batch, h0, c0):
+        enc_out, (he, ce) = self.encoder(batch, h0, c0)
         preds = self.decoder(enc_out)
         return preds
     
@@ -159,6 +157,8 @@ def train(csv_path, aud_path, alphabet_path):
         t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
+        h0 = torch.zeros(3*2, 32, 256)
+        c0 = torch.zeros(3*2, 32, 256)
         preds = model(x)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
