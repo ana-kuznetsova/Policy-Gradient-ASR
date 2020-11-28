@@ -48,11 +48,11 @@ class Encoder(nn.Module):
                              hidden_size=256, 
                              num_layers=3, 
                              bidirectional=True)
-        self.h0 = torch.zeros(3*2, batch_size, 256).to(device)
-        self.c0 = torch.zeros(3*2, batch_size, 256).to(device)
+        self.batch_size = batch_size
         
     def forward(self, x):
-        #Pass through the first linear layer
+        h0 = torch.zeros(3*2, self.batch_size, 256)
+        c0 = torch.zeros(3*2, self.batch_size, 256)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -61,7 +61,7 @@ class Encoder(nn.Module):
             outputs.append(out)
         outputs = torch.stack(outputs)
         #Pass through LSTM layers
-        output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
+        output, (hn, cn) = self.blstm(outputs, (h0, c0))
         return output, (hn, cn)
     
 class Attention(nn.Module):
