@@ -48,8 +48,8 @@ class Encoder(nn.Module):
                              hidden_size=256, 
                              num_layers=3, 
                              bidirectional=True)
-        self.h0 = torch.zeros(3*2, batch_size, 256)
-        self.c0 = torch.zeros(3*2, batch_size, 256)
+        self.h0 = torch.zeros(3*2, batch_size, 256).to(device)
+        self.c0 = torch.zeros(3*2, batch_size, 256).to(device)
         
     def forward(self, x):
         #Pass through the first linear layer
