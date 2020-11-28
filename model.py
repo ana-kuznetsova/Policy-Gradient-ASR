@@ -1,11 +1,13 @@
 import os
-import pandas as pd 
-from data import make_feats
+from tqdm import tqdm
+import pandas as pd
+import numpy as np
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
-import torch.nn as nn
-
+import torchaudio
+from data import extract_feats, encode_trans
 
 class TrainData(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
@@ -83,7 +85,7 @@ class Decoder(nn.Module):
         self.char2ind = char2ind
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
-        self.output = nn.Linear(512, 33)
+        self.output = nn.Linear(1024, 33)
         self.dec_h = torch.zeros(batch_size, 512)
         self.c = torch.zeros(batch_size, 512)
         self.y = torch.zeros(batch_size,  33)
@@ -92,10 +94,11 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for hidden in enc_h:
-            c_t = self.attention(hidden, self.dec_h)
             y = self.embed_layer(self.y)
             self.dec_h, self.c = self.lstm_cell(y, (self.dec_h, self.c))
-            self.y = self.output(self.dec_h)
+            c_t = self.attention(hidden, self.dec_h)
+            combined_output = torch.cat([self.dec_h, c_t],1)
+            self.y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(self.y, dim=1)
             preds.append(y_hat)
         preds = torch.stack(preds)
@@ -135,19 +138,15 @@ def collapse_fn(preds, masks):
         
     return torch.tensor(res)
         
+def train(csv_path, aud_path, alphabet_path, char2ind):
 
-def train(num_epochs=50):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = Seq2Seq(32)
+    model.apply(weights)
+    model = model.to(device)
 
-    device = torch.device("cuda")
+    criterion = nn.CTCLoss(zero_infinity=True)
+    optimizer = optim.Adam(model.parameters(), lr=5e-4)
 
-    encoder = Encoder()
-    encoder.apply(weights)
-    encoder.cuda()
-    encoder = encoder.to(device)
-
-    cv_dataset = TrainData('/nfs/nfs5/home/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                            '/nfs/nfs5/home/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips', make_feats)
-
+    cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
-    print("Loader", len(loader))
-        
