@@ -120,7 +120,7 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
     model = Seq2Seq(batch_size)
     model.apply(weights)
     model = model.to(device)
-    print("summary:", summary(model, 512))
+    #print("summary:", summary(model, 512))
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
@@ -130,6 +130,7 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
 
     for batch in loader:
         x = batch['aud'].to(device)
+        print(x.shape)
         t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
