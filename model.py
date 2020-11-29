@@ -116,7 +116,7 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(32)
     model.apply(weights)
     model = model.to(device)
