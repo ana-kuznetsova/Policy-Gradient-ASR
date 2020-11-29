@@ -52,3 +52,27 @@ def encode_trans(trans, char2ind, maxlen_t=7):
     res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(-1))
     mask = [1 if i>=0 else 0 for i in res]
     return torch.tensor(res), torch.tensor(mask) 
+
+
+def collapse_fn(preds, masks):
+    preds = preds.detach().cpu().numpy()
+    masks = masks.detach().cpu().numpy()
+    collapsed = []
+    maxlen_t = 0
+    for pred, mask in zip(preds, masks):
+        temp = [pred[0]]
+        for i, char in enumerate(pred[1:]):
+            if mask[i]:
+                if pred[i-1]==char:
+                    continue
+                else:
+                    temp.append(char)
+        collapsed.append(temp)
+        maxlen_t = max(maxlen_t, len(temp))
+    
+    res = []
+    for sent in collapsed:
+        sent = np.pad(sent, (0, maxlen_t - len(sent)), 'constant', constant_values=(-1))
+        res.append(sent)
+        
+    return torch.tensor(res)

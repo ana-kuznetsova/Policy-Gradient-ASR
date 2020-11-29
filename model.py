@@ -83,18 +83,16 @@ class Decoder(nn.Module):
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.dec_h = torch.zeros(batch_size, 512)
-        self.c = torch.zeros(batch_size, 512)
         self.y = torch.zeros(batch_size,  33)
         self.attention = Attention()
     
-    def forward(self, enc_h):
+    def forward(self, enc_h, dec_h, dec_c):
         preds = []
         for hidden in enc_h:
             y = self.embed_layer(self.y)
-            self.dec_h, self.c = self.lstm_cell(y, (self.dec_h, self.c))
-            c_t = self.attention(hidden, self.dec_h)
-            combined_output = torch.cat([self.dec_h, c_t],1)
+            dec_h, dec_c = self.lstm_cell(y, (dec_h, dec_c))
+            c_t = self.attention(hidden, dec_h)
+            combined_output = torch.cat([dec_h, c_t],1)
             self.y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(self.y, dim=1)
             preds.append(y_hat)
@@ -106,36 +104,13 @@ class Seq2Seq(nn.Module):
         super().__init__()
         self.encoder = Encoder(batch_size)
         self.decoder = Decoder(batch_size)
-    def forward(self, batch, h0, c0):
-        enc_out, (he, ce) = self.encoder(batch, h0, c0)
-        preds = self.decoder(enc_out)
+    def forward(self, batch, h0_enc, c0_enc, h0_dec, c0_dec):
+        enc_out, (he, ce) = self.encoder(batch, h0_enc, c0_enc)
+        preds = self.decoder(enc_out, h0_dec, c0_dec)
         return preds
     
-    
-def collapse_fn(preds, masks):
-    preds = preds.detach().cpu().numpy()
-    masks = masks.detach().cpu().numpy()
-    collapsed = []
-    maxlen_t = 0
-    for pred, mask in zip(preds, masks):
-        temp = [pred[0]]
-        for i, char in enumerate(pred[1:]):
-            if mask[i]:
-                if pred[i-1]==char:
-                    continue
-                else:
-                    temp.append(char)
-        collapsed.append(temp)
-        maxlen_t = max(maxlen_t, len(temp))
-    
-    res = []
-    for sent in collapsed:
-        sent = np.pad(sent, (0, maxlen_t - len(sent)), 'constant', constant_values=(-1))
-        res.append(sent)
         
-    return torch.tensor(res)
-        
-def train(csv_path, aud_path, alphabet_path):
+def train(csv_path, aud_path, alphabet_path, batch_size=32):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
@@ -157,9 +132,11 @@ def train(csv_path, aud_path, alphabet_path):
         t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
-        h0 = torch.zeros(3*2, 32, 256).to(device)
-        c0 = torch.zeros(3*2, 32, 256).to(device)
-        preds = model(x, h0, c0)
+        h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
+        c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
+        h0_dec = torch.zeros(batch_size, 512)
+        c0_dec = torch.zeros(batch_size, 512)
+        preds = model(x, h0_enc, c0_enc, h0_dec, c0_dec)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
         optimizer.zero_grad()
