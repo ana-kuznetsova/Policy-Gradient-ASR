@@ -139,7 +139,7 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
         c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
         h0_dec = torch.zeros(batch_size, 512).to(device)
         c0_dec = torch.zeros(batch_size, 512).to(device)
-        y0 = torch.zeros(batch_size,  len(char2ind)).to(device)
+        y0 = torch.zeros(batch_size,  33).to(device)
 
         preds = model(x, h0_enc, c0_enc, h0_dec, c0_dec, y0)
         input_length = torch.sum(fmask, dim =1).long().to(device)
