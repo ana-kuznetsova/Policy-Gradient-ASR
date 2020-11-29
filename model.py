@@ -116,9 +116,9 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(batch_size).cuda()
+    model = Seq2Seq(batch_size)
     model.apply(weights)
-    #model = model.to(device)
+    model = model.to(device)
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
