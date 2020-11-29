@@ -73,7 +73,9 @@ class Attention(nn.Module):
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
+        print("A_t", a_t.get_device())
         c_t = torch.zeros(h_e.shape)
+        print("c_t", c_t.get_device())
         for a in a_t:
             c_t+=a*h_e  
         return c_t
