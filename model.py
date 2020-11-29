@@ -116,9 +116,9 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(32)
+    model = Seq2Seq(batch_size).cuda()
     model.apply(weights)
-    model = model.to(device)
+    #model = model.to(device)
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
@@ -132,12 +132,13 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
 
+        #Initialize values for zero hidden state
         h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
         c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
         h0_dec = torch.zeros(batch_size, 512).to(device)
         c0_dec = torch.zeros(batch_size, 512).to(device)
-        y0 = torch.zeros(batch_size,  33).to(device)
-        
+        y0 = torch.zeros(batch_size,  len(alphabet)).to(device)
+
         preds = model(x, h0_enc, c0_enc, h0_dec, c0_dec, y0)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
