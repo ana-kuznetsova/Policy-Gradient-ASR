@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 import torchaudio
+from torchsummary import summary
 from data import extract_feats, encode_trans
 
 class TrainData(data.Dataset):
@@ -119,7 +120,7 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
     model = Seq2Seq(batch_size)
     model.apply(weights)
     model = model.to(device)
-    print("summary:", model.summary())
+    print("summary:", summary(model))
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
