@@ -113,7 +113,9 @@ class Seq2Seq(nn.Module):
 
     def forward(self, batch):
         enc_out, (he, ce) = self.encoder(batch)
+        print("enc:", enc_out)
         preds = self.decoder(enc_out)
+        print("dec:", preds)
         return preds
     
         
