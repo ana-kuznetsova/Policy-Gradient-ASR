@@ -78,10 +78,12 @@ class Attention(nn.Module):
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
         #print("a_t", a_t)
+        '''
         c_t = self.c_t
         for a in a_t:
-            c_t+=a*h_e  
-        return c_t
+            c_t+=a*h_e 
+        ''' 
+        #return c_t
         
     
 class Decoder(nn.Module):
