@@ -64,17 +64,17 @@ class Encoder(nn.Module):
         return output, (hn, cn)
     
 class Attention(nn.Module):
-    def __init__(self):
+    def __init__(self, h_e):
         super().__init__()
+        self.register_buffer('c_t', torch.zeros(h_e.shape))
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
-        print("Score:", score.get_device())
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
-        print("A_t", a_t.get_device())
-        c_t = torch.zeros(h_e.shape)
+        #c_t = torch.zeros(h_e.shape)
+        c_t = self.c_t
         print("c_t", c_t.get_device())
         for a in a_t:
             c_t+=a*h_e  
@@ -82,12 +82,12 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, h_e):
         super().__init__()
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention()
+        self.attention = Attention(h_e)
     
     def forward(self, enc_h, dec_h, dec_c, y):
         preds = []
@@ -103,10 +103,10 @@ class Decoder(nn.Module):
         return preds
     
 class Seq2Seq(nn.Module):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, h_e):
         super().__init__()
         self.encoder = Encoder(batch_size)
-        self.decoder = Decoder(batch_size)
+        self.decoder = Decoder(batch_size, h_e)
     def forward(self, batch, h0_enc, c0_enc, h0_dec, c0_dec, y):
         enc_out, (he, ce) = self.encoder(batch, h0_enc, c0_enc)
         preds = self.decoder(enc_out, h0_dec, c0_dec, y)
@@ -120,7 +120,8 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(batch_size)
+    h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
+    model = Seq2Seq(batch_size, h0_enc)
     model.apply(weights)
     model = model.to(device)
 
