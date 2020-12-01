@@ -101,6 +101,7 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for i, hidden in enumerate(enc_h):
+            print(hidden)
             self.y = self.embed_layer(self.y)
             #print("y", self.y.get_device())
             if i==0:
