@@ -66,9 +66,11 @@ class Encoder(nn.Module):
         return output, (hn, cn)
     
 class Attention(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size):
+    def __init__(self, batch_size, enc_hidden_size, use_cuda):
         super().__init__()
-        self.register_buffer('c_t', torch.zeros(batch_size, 2*enc_hidden_size))
+        self.c_t = torch.zeros(batch_size, 2*enc_hidden_size, requires_grad=True)
+        if use_cuda:
+            self.c_t = c_t.cuda()
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
@@ -100,13 +102,12 @@ class Decoder(nn.Module):
         preds = []
         for i, hidden in enumerate(enc_h):
             self.y = self.embed_layer(self.y)
-            print("y", self.y.get_device())
+            #print("y", self.y.get_device())
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            
-            print("dec H", self.dec_h.get_device())
+            #print("dec H", self.dec_h.get_device())
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             combined_output = torch.cat([self.dec_h, c_t], 1)
