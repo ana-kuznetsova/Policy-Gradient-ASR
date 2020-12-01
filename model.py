@@ -54,6 +54,7 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x):
+        print('X:', x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -72,8 +73,8 @@ class Attention(nn.Module):
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
-        print("hid_E:", h_e, "Hid_D:", h_d)
-        print("score:", score)
+        #print("hid_E:", h_e, "Hid_D:", h_d)
+        #print("score:", score)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
