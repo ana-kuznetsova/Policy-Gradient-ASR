@@ -84,7 +84,7 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size):
+    def __init__(self, batch_size, enc_hidden_size, use_cuda):
         super().__init__()
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
@@ -92,8 +92,10 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        self.y = nn.Parameter(torch.zeros(batch_size,  33), requires_grad=True)
-    
+        self.y = torch.zeros(batch_size,  33, requires_grad=True)
+        if use_cuda:
+            self.y = self.y.cuda()
+
     def forward(self, enc_h):
         preds = []
         for i, hidden in enumerate(enc_h):
@@ -117,7 +119,7 @@ class Seq2Seq(nn.Module):
     def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
         self.encoder = Encoder(batch_size)
-        self.decoder = Decoder(batch_size, enc_hidden_size)
+        self.decoder = Decoder(batch_size, enc_hidden_size, use_cuda=True)
 
     def forward(self, batch):
         enc_out, (he, ce) = self.encoder(batch)
