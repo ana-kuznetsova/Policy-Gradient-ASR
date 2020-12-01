@@ -72,7 +72,7 @@ class Attention(nn.Module):
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
-        print("hid:", h_e)
+        print("hid_E:", h_e, "Hid_D:", h_d)
         print("score:", score)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
