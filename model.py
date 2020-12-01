@@ -50,8 +50,10 @@ class Encoder(nn.Module):
                              num_layers=3, 
                              bidirectional=True)
         self.batch_size = batch_size
+        self.register_buffer("h0", torch.zeros(3*2, batch_size, 256))
+        self.register_buffer("c0", torch.zeros(3*2, batch_size, 256))
         
-    def forward(self, x, h0, c0):
+    def forward(self, x):
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -60,7 +62,8 @@ class Encoder(nn.Module):
             outputs.append(out)
         outputs = torch.stack(outputs)
         #Pass through LSTM layers
-        output, (hn, cn) = self.blstm(outputs, (h0, c0))
+        output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
+        print("Encoder output:", output)
         return output, (hn, cn)
     
 class Attention(nn.Module):
@@ -88,13 +91,16 @@ class Decoder(nn.Module):
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
         self.attention = Attention(h_e)
+        self.register_buffer("dec_h", torch.zeros(batch_size, 512))
+        self.register_buffer("dec_c", torch.zeros(batch_size, 512))
+        self.register_buffer("y", torch.zeros(batch_size,  33))
     
-    def forward(self, enc_h, dec_h, dec_c, y):
+    def forward(self, enc_h):
         preds = []
         for hidden in enc_h:
-            y = self.embed_layer(y)
-            dec_h, dec_c = self.lstm_cell(y, (dec_h, dec_c))
-            c_t = self.attention(hidden, dec_h)
+            y = self.embed_layer(self.y)
+            self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
+            c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([dec_h, c_t],1)
             y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(y, dim=1)
@@ -139,11 +145,11 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
         tmask = batch['tmask'].squeeze(1).to(device)
 
         #Initialize values for zero hidden state
-        h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
-        c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
-        h0_dec = torch.zeros(batch_size, 512).to(device)
-        c0_dec = torch.zeros(batch_size, 512).to(device)
-        y0 = torch.zeros(batch_size,  33).to(device)
+        #h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
+        #c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
+        #h0_dec = torch.zeros(batch_size, 512).to(device)
+        #c0_dec = torch.zeros(batch_size, 512).to(device)
+        #y0 = torch.zeros(batch_size,  33).to(device)
 
         preds = model(x, h0_enc, c0_enc, h0_dec, c0_dec, y0)
         input_length = torch.sum(fmask, dim =1).long().to(device)
