@@ -96,14 +96,15 @@ class Decoder(nn.Module):
 
     def forward(self, enc_h):
         preds = []
+        self.y = self.embed_layer(self.y)
+            
         for i, hidden in enumerate(enc_h):
-            print("init y", self.y)
-            self.y = self.embed_layer(self.y)
-            print("y", self.y)
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
+            print("h_e:", hidden.shape, "h_d:", self.dec_h.shape)
+            '''
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             combined_output = torch.cat([self.dec_h, c_t], 1)
@@ -114,6 +115,7 @@ class Decoder(nn.Module):
             #print("y", self.y)
             preds.append(y_hat)
         preds = torch.stack(preds)
+        '''
         return preds
     
 class Seq2Seq(nn.Module):
