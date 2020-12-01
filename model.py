@@ -94,26 +94,24 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size, use_cuda)
         self.dec_h = None 
         self.dec_c = None
-        self.y = torch.randn(batch_size,  33, requires_grad=True)
+        self.y = torch.randn(batch_size,  128, requires_grad=True)
         if use_cuda:
             self.y = self.y.cuda(use_cuda)
 
     def forward(self, enc_h):
         preds = []
         for i, hidden in enumerate(enc_h):
-            self.y = self.embed_layer(self.y)
-            #print("y", self.y.get_device())
+            #self.y = self.embed_layer(self.y)
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
-                print("dec H", self.dec_h)
-                print("y", self.y)
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             combined_output = torch.cat([self.dec_h, c_t], 1)
-            self.y = self.output(combined_output)
-            y_hat = nn.functional.log_softmax(self.y, dim=1)
+            y_hat = self.output(combined_output)
+            y_hat = nn.functional.log_softmax(y_hat, dim=1)
+            self.y = self.embed_layer(y_hat)
             #print("y_hat:", y_hat)
             preds.append(y_hat)
         preds = torch.stack(preds)
