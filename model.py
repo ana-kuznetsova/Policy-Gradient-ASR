@@ -71,6 +71,7 @@ class Attention(nn.Module):
         self.register_buffer('c_t', torch.zeros(h_e.shape))
         
     def forward(self, h_e, h_d):
+        print("h_e", h_e.shape, "h_d", h_d.shape)
         score = torch.matmul(h_e.T, h_d)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
@@ -98,9 +99,7 @@ class Decoder(nn.Module):
         preds = []
         for hidden in enc_h:
             y = self.embed_layer(self.y)
-            print("before:", self.dec_h)
             self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
-            print("after:", self.dec_h)
             c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([self.dec_h, c_t], 1)
             y = self.output(combined_output)
