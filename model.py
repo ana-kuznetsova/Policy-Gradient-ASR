@@ -70,7 +70,7 @@ class Attention(nn.Module):
         super().__init__()
         self.c_t = torch.zeros(batch_size, 2*enc_hidden_size, requires_grad=True)
         if use_cuda:
-            self.c_t = c_t.cuda()
+            self.c_t = self.c_t.cuda()
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
