@@ -99,7 +99,7 @@ class Decoder(nn.Module):
             self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([self.dec_h, c_t], 1)
-            y = self.output(combined_output)
+            self.y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(y, dim=1)
             print("y_hat:", y_hat)
             preds.append(y_hat)
