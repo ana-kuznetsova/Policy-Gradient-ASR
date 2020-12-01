@@ -98,6 +98,7 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for hidden in enc_h:
+            print("hidden:", hidden.shape)
             y = self.embed_layer(self.y)
             self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
