@@ -107,6 +107,7 @@ class Decoder(nn.Module):
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 print("dec H", self.dec_h)
+                print("y":, self.y)
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
