@@ -63,7 +63,7 @@ class Encoder(nn.Module):
         outputs = torch.stack(outputs)
         #Pass through LSTM layers
         #output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
-        output, (hn, cn) = self.blstm(outputs))
+        output, (hn, cn) = self.blstm(outputs)
         return output, (hn, cn)
     
 class Attention(nn.Module):
