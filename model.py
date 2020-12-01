@@ -50,8 +50,8 @@ class Encoder(nn.Module):
                              num_layers=3, 
                              bidirectional=True)
         self.batch_size = batch_size
-        self.register_buffer("h0", torch.zeros(3*2, batch_size, 256))
-        self.register_buffer("c0", torch.zeros(3*2, batch_size, 256))
+        self.register_buffer("h0", torch.randn(3*2, batch_size, 256))
+        self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x):
         outputs=[]
@@ -62,8 +62,7 @@ class Encoder(nn.Module):
             outputs.append(out)
         outputs = torch.stack(outputs)
         #Pass through LSTM layers
-        #output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
-        output, (hn, cn) = self.blstm(outputs)
+        output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
         return output, (hn, cn)
     
 class Attention(nn.Module):
