@@ -105,10 +105,9 @@ class Decoder(nn.Module):
             #print("y", self.y.get_device())
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
-                print("dec H", self.dec_h)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            #print("dec H", self.dec_h)
+                print("dec H", self.dec_h)
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             combined_output = torch.cat([self.dec_h, c_t], 1)
