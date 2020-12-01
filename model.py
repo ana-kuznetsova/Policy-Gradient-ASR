@@ -90,15 +90,18 @@ class Decoder(nn.Module):
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
         self.attention = Attention(batch_size, enc_hidden_size)
-        self.register_buffer("dec_h", torch.zeros(batch_size, 512))
-        self.register_buffer("dec_c", torch.zeros(batch_size, 512))
-        self.register_buffer("y", torch.zeros(batch_size,  33))
+        self.dec_h = None 
+        self.dec_c = None
+        self.y = nn.Parameter(torch.zeros(batch_size,  33), requires_grad=True)
     
     def forward(self, enc_h):
         preds = []
-        for hidden in enc_h:
+        for i, hidden in enumerate(enc_h):
             self.y = self.embed_layer(self.y)
-            self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
+            if i==0:
+                self.dec_h, self.dec_c = self.lstm_cell(self.y)
+            else:
+                self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             print("dec H", self.dec_h)
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
@@ -133,9 +136,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
     model = Seq2Seq(batch_size, enc_hidden_size)
     model.apply(weights)
     model = model.to(device)
-    print(model)
 
-    '''
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
 
@@ -158,4 +159,3 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         #loss.backward(retain_graph=True)
         #optimizer.step()
         print("----------------------------------------------------")
-    '''
