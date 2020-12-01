@@ -72,13 +72,11 @@ class Attention(nn.Module):
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
-        print("Score:", score.shape)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
-        #c_t = torch.zeros(h_e.shape)
         c_t = self.c_t
-        print("c_t", c_t.get_device())
+        print("c_t", c_t.shape)
         for a in a_t:
             c_t+=a*h_e  
         return c_t
@@ -98,7 +96,6 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for hidden in enc_h:
-            print("hidden:", hidden.shape)
             y = self.embed_layer(self.y)
             self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
