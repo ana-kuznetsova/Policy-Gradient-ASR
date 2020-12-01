@@ -76,7 +76,7 @@ class Attention(nn.Module):
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
-        print("a_t", a_t)
+        #print("a_t", a_t)
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e  
@@ -104,8 +104,8 @@ class Decoder(nn.Module):
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             
-            
-            c_t = self.attention(hidden, self.dec_h)
+            print(self.dec_h)
+            #c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             '''
             combined_output = torch.cat([self.dec_h, c_t], 1)
