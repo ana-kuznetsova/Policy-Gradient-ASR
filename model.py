@@ -106,49 +106,25 @@ class Decoder(nn.Module):
         return preds
     
 class Seq2Seq(nn.Module):
-    def __init__(self, batch_size, h_e):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
         self.encoder = Encoder(batch_size)
-        self.decoder = Decoder(batch_size, h_e)
-    def forward(self, batch, h0_enc, c0_enc, h0_dec, c0_dec, y):
-        enc_out, (he, ce) = self.encoder(batch, h0_enc, c0_enc)
-        preds = self.decoder(enc_out, h0_dec, c0_dec, y)
+        self.decoder = Decoder(batch_size, enc_hidden_size)
+
+    def forward(self, batch):
+        enc_out, (he, ce) = self.encoder(batch)
+        preds = self.decoder(enc_out)
         return preds
     
         
-def train(csv_path, aud_path, alphabet_path,  batch_size=32):
+def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
-
+    
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    enc = Encoder(batch_size)
-    enc = enc.to(device)
-
-    h0_enc = torch.zeros(3*2, batch_size, 256)
-
-    dec = Decoder(batch_size, h0_enc.shape[2])
-    dec = dec.to(device)
-
-
-    cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
-    loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
-    for batch in loader:
-        x = batch['aud'].to(device)
-        #print(x.shape)
-        t = batch['trans'].to(device)
-        fmask = batch['fmask'].squeeze(1).to(device)
-        tmask = batch['tmask'].squeeze(1).to(device)
-        out_enc, (he, ce) = enc(x)
-        print("out enc:", out_enc.shape)
-        dec_out = dec(out_enc)
-        print("dec out:", dec_out.shape)
-
-    '''
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
-    model = Seq2Seq(batch_size, h0_enc)
+    model = Seq2Seq(batch_size, enc_hidden_size)
     model.apply(weights)
     model = model.to(device)
 
@@ -165,20 +141,12 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32):
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
 
-        #Initialize values for zero hidden state
-        #h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
-        #c0_enc = torch.zeros(3*2, batch_size, 256).to(device)
-        #h0_dec = torch.zeros(batch_size, 512).to(device)
-        #c0_dec = torch.zeros(batch_size, 512).to(device)
-        #y0 = torch.zeros(batch_size,  33).to(device)
-
         preds = model(x)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
         optimizer.zero_grad()
         loss = criterion(preds, t, input_length, target_length)
         print(loss.detach().cpu().numpy())
-        loss.backward(retain_graph=True)
-        optimizer.step()
+        #loss.backward(retain_graph=True)
+        #optimizer.step()
         print("----------------------------------------------------")
-        '''
