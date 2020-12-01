@@ -72,10 +72,11 @@ class Attention(nn.Module):
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
+        print("score:", score)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
-        print("a_t", a_t)
+        #print("a_t", a_t)
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e  
