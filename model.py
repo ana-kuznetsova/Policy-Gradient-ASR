@@ -66,9 +66,9 @@ class Encoder(nn.Module):
         return output, (hn, cn)
     
 class Attention(nn.Module):
-    def __init__(self, h_e):
+    def __init__(self, batch_size, enc_hidden):
         super().__init__()
-        self.register_buffer('c_t', torch.zeros(h_e.shape))
+        self.register_buffer('c_t', torch.zeros(batch_size, 2*enc_hidden))
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
@@ -89,7 +89,7 @@ class Decoder(nn.Module):
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention(enc_h)
+        self.attention = Attention(batch_size, enc_h)
         self.register_buffer("dec_h", torch.zeros(batch_size, 512))
         self.register_buffer("dec_c", torch.zeros(batch_size, 512))
         self.register_buffer("y", torch.zeros(batch_size,  33))
