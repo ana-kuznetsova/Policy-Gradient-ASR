@@ -100,11 +100,13 @@ class Decoder(nn.Module):
         preds = []
         for i, hidden in enumerate(enc_h):
             self.y = self.embed_layer(self.y)
+            print("y", self.y.get_device())
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            #print("dec H", self.dec_h)
+            
+            print("dec H", self.dec_h.get_device())
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             combined_output = torch.cat([self.dec_h, c_t], 1)
