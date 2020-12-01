@@ -100,7 +100,7 @@ class Decoder(nn.Module):
             c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([self.dec_h, c_t], 1)
             self.y = self.output(combined_output)
-            y_hat = nn.functional.log_softmax(y, dim=1)
+            y_hat = nn.functional.log_softmax(self.y, dim=1)
             print("y_hat:", y_hat)
             preds.append(y_hat)
         preds = torch.stack(preds)
