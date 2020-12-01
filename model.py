@@ -63,7 +63,6 @@ class Encoder(nn.Module):
         outputs = torch.stack(outputs)
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
-        print("Encoder output:", output)
         return output, (hn, cn)
     
 class Attention(nn.Module):
@@ -85,12 +84,12 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, batch_size, h_e):
+    def __init__(self, batch_size, enc_h):
         super().__init__()
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention(h_e)
+        self.attention = Attention(enc_h)
         self.register_buffer("dec_h", torch.zeros(batch_size, 512))
         self.register_buffer("dec_c", torch.zeros(batch_size, 512))
         self.register_buffer("y", torch.zeros(batch_size,  33))
@@ -99,9 +98,11 @@ class Decoder(nn.Module):
         preds = []
         for hidden in enc_h:
             y = self.embed_layer(self.y)
+            print("before:", self.dec_h)
             self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
+            print("after:", self.dec_h)
             c_t = self.attention(hidden, self.dec_h)
-            combined_output = torch.cat([dec_h, c_t],1)
+            combined_output = torch.cat([self.dec_h, c_t], 1)
             y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(y, dim=1)
             preds.append(y_hat)
@@ -128,6 +129,13 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32):
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     enc = Encoder(batch_size)
     enc = enc.to(device)
+
+    h0_enc = torch.zeros(3*2, batch_size, 256)
+
+    dec = Decoder(batch_size, h0_enc)
+    dec = dec.to(device)
+
+
     cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
     for batch in loader:
@@ -136,7 +144,8 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32):
         t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
-        out = enc(x)
+        out_enc = enc(x)
+        dec_out = dec(out_enc)
 
     '''
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
