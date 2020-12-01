@@ -135,6 +135,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
     model = model.to(device)
     print(model)
 
+    '''
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
 
@@ -157,3 +158,4 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         #loss.backward(retain_graph=True)
         #optimizer.step()
         print("----------------------------------------------------")
+    '''
