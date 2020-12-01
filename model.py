@@ -145,6 +145,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32):
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
         out_enc = enc(x)
+        print("out enc:", out_enc.shape)
         dec_out = dec(out_enc)
 
     '''
