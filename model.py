@@ -66,9 +66,9 @@ class Encoder(nn.Module):
         return output, (hn, cn)
     
 class Attention(nn.Module):
-    def __init__(self, batch_size, enc_hidden):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
-        self.register_buffer('c_t', torch.zeros(batch_size, 2*enc_hidden))
+        self.register_buffer('c_t', torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
@@ -84,12 +84,12 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, batch_size, enc_h):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention(batch_size, enc_h)
+        self.attention = Attention(batch_size, enc_hidden_size)
         self.register_buffer("dec_h", torch.zeros(batch_size, 512))
         self.register_buffer("dec_c", torch.zeros(batch_size, 512))
         self.register_buffer("y", torch.zeros(batch_size,  33))
@@ -130,7 +130,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32):
 
     h0_enc = torch.zeros(3*2, batch_size, 256)
 
-    dec = Decoder(batch_size, h0_enc)
+    dec = Decoder(batch_size, h0_enc.shape[2])
     dec = dec.to(device)
 
 
