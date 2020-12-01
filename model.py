@@ -119,12 +119,26 @@ class Seq2Seq(nn.Module):
         return preds
     
         
-def train(csv_path, aud_path, alphabet_path, batch_size=32):
+def train(csv_path, aud_path, alphabet_path,  batch_size=32):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
 
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    enc = Encoder(batch_size)
+    enc = enc.to(device)
+    cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
+    loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
+    for batch in loader:
+        x = batch['aud'].to(device)
+        #print(x.shape)
+        t = batch['trans'].to(device)
+        fmask = batch['fmask'].squeeze(1).to(device)
+        tmask = batch['tmask'].squeeze(1).to(device)
+        out = enc(x)
+
+    '''
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     h0_enc = torch.zeros(3*2, batch_size, 256).to(device)
     model = Seq2Seq(batch_size, h0_enc)
@@ -160,3 +174,4 @@ def train(csv_path, aud_path, alphabet_path, batch_size=32):
         loss.backward(retain_graph=True)
         optimizer.step()
         print("----------------------------------------------------")
+        '''
