@@ -66,11 +66,9 @@ class Encoder(nn.Module):
         return output, (hn, cn)
     
 class Attention(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size, use_cuda):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
-        self.c_t = torch.zeros(batch_size, 2*enc_hidden_size, requires_grad=True)
-        if use_cuda:
-            self.c_t = self.c_t.cuda(use_cuda)
+        self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
@@ -78,7 +76,7 @@ class Attention(nn.Module):
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
-        #print("a_t", a_t)
+        print("a_t", a_t)
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e  
@@ -86,23 +84,20 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size, use_cuda):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention(batch_size, enc_hidden_size, use_cuda)
+        self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        self.y = torch.randn(batch_size,  128, requires_grad=True)
-        if use_cuda:
-            self.y = self.y.cuda(use_cuda)
+        self.register_buffer("y", torch.randn(batch_size,  33))
 
     def forward(self, enc_h):
         preds = []
         for i, hidden in enumerate(enc_h):
-            #self.y = self.embed_layer(self.y)
-            print("y", self.y)
+            self.y = self.embed_layer(self.y)
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
@@ -120,10 +115,10 @@ class Decoder(nn.Module):
         return preds
     
 class Seq2Seq(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size, device):
+    def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
         self.encoder = Encoder(batch_size)
-        self.decoder = Decoder(batch_size, enc_hidden_size, use_cuda=device)
+        self.decoder = Decoder(batch_size, enc_hidden_size)
 
     def forward(self, batch):
         enc_out, (he, ce) = self.encoder(batch)
@@ -165,3 +160,4 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         #loss.backward(retain_graph=True)
         #optimizer.step()
         print("----------------------------------------------------")
+        break
