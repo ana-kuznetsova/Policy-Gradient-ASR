@@ -71,8 +71,8 @@ class Attention(nn.Module):
         self.register_buffer('c_t', torch.zeros(h_e.shape))
         
     def forward(self, h_e, h_d):
-        print("h_e", h_e.shape, "h_d", h_d.shape)
         score = torch.matmul(h_e.T, h_d)
+        print("Score:", score.shape)
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
