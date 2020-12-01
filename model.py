@@ -97,7 +97,9 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for i, hidden in enumerate(enc_h):
+            print("init y", self.y)
             self.y = self.embed_layer(self.y)
+            print("y", self.y)
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
@@ -109,7 +111,7 @@ class Decoder(nn.Module):
             y_hat = nn.functional.log_softmax(y_hat, dim=1)
             self.y = self.embed_layer(y_hat)
             #print("y_hat:", y_hat)
-            print("y", self.y)
+            #print("y", self.y)
             preds.append(y_hat)
         preds = torch.stack(preds)
         return preds
