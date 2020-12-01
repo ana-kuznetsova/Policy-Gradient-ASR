@@ -94,7 +94,7 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size, use_cuda)
         self.dec_h = None 
         self.dec_c = None
-        self.y = torch.zeros(batch_size,  33, requires_grad=True)
+        self.y = torch.randn(batch_size,  33, requires_grad=True)
         if use_cuda:
             self.y = self.y.cuda(use_cuda)
 
