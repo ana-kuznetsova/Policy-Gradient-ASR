@@ -95,12 +95,13 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         for hidden in enc_h:
-            y = self.embed_layer(self.y)
-            self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
+            self.y = self.embed_layer(self.y)
+            self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([self.dec_h, c_t], 1)
             y = self.output(combined_output)
             y_hat = nn.functional.log_softmax(y, dim=1)
+            print("y_hat:", y_hat)
             preds.append(y_hat)
         preds = torch.stack(preds)
         return preds
@@ -113,9 +114,8 @@ class Seq2Seq(nn.Module):
 
     def forward(self, batch):
         enc_out, (he, ce) = self.encoder(batch)
-        print("enc:", enc_out)
         preds = self.decoder(enc_out)
-        print("dec:", preds)
+        #print("dec:", preds)
         return preds
     
         
