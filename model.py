@@ -91,7 +91,7 @@ class Decoder(nn.Module):
         self.embed_layer = nn.Linear(33, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, 33)
-        self.attention = Attention(batch_size, enc_hidden_size)
+        self.attention = Attention(batch_size, enc_hidden_size, use_cuda)
         self.dec_h = None 
         self.dec_c = None
         self.y = torch.zeros(batch_size,  33, requires_grad=True)
