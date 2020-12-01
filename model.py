@@ -75,6 +75,7 @@ class Attention(nn.Module):
         temp1 = torch.exp(score)
         temp2 = torch.sum(score, dim=0)
         a_t = temp1/temp2
+        print("temp1:", temp1.shape, "temp2:", temp2.shape, "a_t:", a_t.shape)
         c_t = self.c_t
         print("c_t", c_t.shape)
         for a in a_t:
