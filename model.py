@@ -71,7 +71,7 @@ class Attention(nn.Module):
         self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
-        score = torch.matmul(h_e.T, h_d)
+        score = torch.mm(h_e.T, h_d)
         print("hid_E:", h_e, "Hid_D:", h_d)
         print("score:", score)
         temp1 = torch.exp(score)
