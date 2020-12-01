@@ -103,10 +103,11 @@ class Decoder(nn.Module):
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            print("h_e:", hidden.shape, "h_d:", self.dec_h.shape)
-            '''
+            
+            
             c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
+            '''
             combined_output = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_output)
             y_hat = nn.functional.log_softmax(y_hat, dim=1)
