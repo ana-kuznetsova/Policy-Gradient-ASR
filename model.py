@@ -70,7 +70,7 @@ class Attention(nn.Module):
         super().__init__()
         self.c_t = torch.zeros(batch_size, 2*enc_hidden_size, requires_grad=True)
         if use_cuda:
-            self.c_t = self.c_t.cuda()
+            self.c_t = self.c_t.cuda(use_cuda)
         
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
@@ -96,7 +96,7 @@ class Decoder(nn.Module):
         self.dec_c = None
         self.y = torch.zeros(batch_size,  33, requires_grad=True)
         if use_cuda:
-            self.y = self.y.cuda()
+            self.y = self.y.cuda(use_cuda)
 
     def forward(self, enc_h):
         preds = []
@@ -119,10 +119,10 @@ class Decoder(nn.Module):
         return preds
     
 class Seq2Seq(nn.Module):
-    def __init__(self, batch_size, enc_hidden_size):
+    def __init__(self, batch_size, enc_hidden_size, device):
         super().__init__()
         self.encoder = Encoder(batch_size)
-        self.decoder = Decoder(batch_size, enc_hidden_size, use_cuda=True)
+        self.decoder = Decoder(batch_size, enc_hidden_size, use_cuda=device)
 
     def forward(self, batch):
         enc_out, (he, ce) = self.encoder(batch)
@@ -138,7 +138,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     
     device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(batch_size, enc_hidden_size)
+    model = Seq2Seq(batch_size, enc_hidden_size, device)
     model.apply(weights)
     model = model.to(device)
 
