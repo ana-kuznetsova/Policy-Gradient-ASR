@@ -68,7 +68,6 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
-        print("enc out", output.shape)
         return output, (hn, cn)
     
 class Attention(nn.Module):
@@ -109,6 +108,7 @@ class Decoder(nn.Module):
         self.y = self.embed_layer(self.y)
             
         for i, hidden in enumerate(enc_h):
+            print("hidd", hidden.shape)
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
