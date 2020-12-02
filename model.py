@@ -85,13 +85,11 @@ class Attention(nn.Module):
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
         a_t = nn.functional.softmax(score, dim=0)
-        print("he", h_e.shape)
-        '''
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e 
-        ''' 
-        #return c_t
+        print("ct", c_t)
+        return c_t
         
     
 class Decoder(nn.Module):
