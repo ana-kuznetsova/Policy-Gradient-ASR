@@ -76,6 +76,7 @@ class Attention(nn.Module):
         self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
+        print(h_e.shape, h_d.shape)
         score = torch.matmul(h_e.T, h_d)
         #print("hid_E:", h_e, "Hid_D:", h_d)
         #print("score:", score)
