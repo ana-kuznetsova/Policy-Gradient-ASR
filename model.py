@@ -62,14 +62,11 @@ class Encoder(nn.Module):
             out = torch.nn.LeakyReLU()(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
-        print("before packing", outputs.shape)
-        #print(torch.isnan(outputs).sum())
         lengths = torch.sum(mask, dim=1)
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
-        print("unpacked", output.shape)
         return output, (hn, cn)
     
 class Attention(nn.Module):
@@ -78,8 +75,8 @@ class Attention(nn.Module):
         self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
+        print("hid_E:", h_e.shape, "Hid_D:", h_d.shape)
         score = torch.matmul(h_e.T, h_d)
-        #print("hid_E:", h_e, "Hid_D:", h_d)
         #print("score:", score)
         #temp1 = torch.exp(score)
         #temp2 = torch.sum(score, dim=0)
