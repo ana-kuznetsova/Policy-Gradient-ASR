@@ -88,7 +88,6 @@ class Attention(nn.Module):
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e 
-        print("ct", c_t)
         return c_t
         
     
@@ -113,7 +112,7 @@ class Decoder(nn.Module):
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
-            #print("C_t:", c_t)
+            print("C_t:", c_t.shape)
             '''
             combined_output = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_output)
