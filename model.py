@@ -118,7 +118,6 @@ class Decoder(nn.Module):
             self.y = self.embed_layer(y_hat)
             preds.append(y_hat)
         preds = torch.stack(preds)
-        print("preds", preds)
         return preds
     
 class Seq2Seq(nn.Module):
@@ -130,7 +129,6 @@ class Seq2Seq(nn.Module):
     def forward(self, x, mask):
         enc_out, (he, ce) = self.encoder(x, mask)
         preds = self.decoder(enc_out)
-        #print("dec:", preds)
         return preds
     
         
@@ -167,4 +165,3 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         #loss.backward(retain_graph=True)
         #optimizer.step()
         print("----------------------------------------------------")
-        break
