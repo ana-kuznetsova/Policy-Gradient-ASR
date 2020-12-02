@@ -61,9 +61,7 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
-        print("before:", x.shape)
         x = nan_to_num(x)
-        print("after:", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -85,13 +83,10 @@ class Attention(nn.Module):
         self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
-        print("hid_E:", h_e, "Hid_D:", h_d)
         score = torch.matmul(h_e.T, h_d)
         print("score:", score)
-        #temp1 = torch.exp(score)
-        #temp2 = torch.sum(score, dim=0)
         a_t = nn.functional.softmax(score, dim=0)
-        #print("a_t", a_t)
+        print("a_t", a_t)
         '''
         c_t = self.c_t
         for a in a_t:
