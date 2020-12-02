@@ -61,6 +61,7 @@ class Encoder(nn.Module):
             out = self.input_layer(feature)
             out = torch.nn.LeakyReLU()(out)
             outputs.append(out)
+        print("X", torch.isnan(x))
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1)
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
@@ -110,7 +111,7 @@ class Decoder(nn.Module):
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            c_t = self.attention(hidden, self.dec_h)
+            #c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             '''
             combined_output = torch.cat([self.dec_h, c_t], 1)
