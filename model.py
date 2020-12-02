@@ -41,6 +41,12 @@ def weights(m):
         nn.init.xavier_normal_(m.weight.data)
         nn.init.constant_(m.bias.data,0.1)
 
+def nan_to_num(t,mynan=0.):
+    if torch.all(torch.isfinite(t)):
+        return t
+    if len(t.size()) == 0:
+        return torch.tensor(mynan)
+    return torch.cat([nan_to_num(l).unsqueeze(0) for l in t],0)
 
 class Encoder(nn.Module):
     def __init__(self, batch_size):
@@ -55,9 +61,9 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
-        #x = torch.nan_to_num(x)
-        res = x != x
-        print(res)
+        print("before:", x.shape)
+        x = nan_to_num(x)
+        print("after:", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
