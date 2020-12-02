@@ -55,7 +55,6 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
-        print(x)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -69,6 +68,7 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
+        print(output)
         return output, (hn, cn)
     
 class Attention(nn.Module):
