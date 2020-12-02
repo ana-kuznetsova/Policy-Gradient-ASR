@@ -62,7 +62,7 @@ class Encoder(nn.Module):
             out = torch.nn.LeakyReLU()(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
-        #print(outputs)
+        print("before packing", outputs.shape)
         #print(torch.isnan(outputs).sum())
         lengths = torch.sum(mask, dim=1)
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
