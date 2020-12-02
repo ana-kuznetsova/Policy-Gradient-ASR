@@ -8,6 +8,7 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchaudio
 from torchsummary import summary
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data import extract_feats, encode_trans
 
 class TrainData(data.Dataset):
@@ -53,8 +54,9 @@ class Encoder(nn.Module):
         self.register_buffer("h0", torch.randn(3*2, batch_size, 256))
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
-    def forward(self, x):
-        print('X:', x.shape)
+    def forward(self, x, mask):
+        lengths = torch.sum(mask, dim=1)
+        x = pack_padded_sequence(x, lengths, enforce_sorted=False)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -62,6 +64,7 @@ class Encoder(nn.Module):
             out = torch.nn.LeakyReLU()(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
+        print(torch.isnan(outputs).sum())
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
         return output, (hn, cn)
@@ -128,9 +131,9 @@ class Seq2Seq(nn.Module):
         self.encoder = Encoder(batch_size)
         self.decoder = Decoder(batch_size, enc_hidden_size)
 
-    def forward(self, batch):
-        enc_out, (he, ce) = self.encoder(batch)
-        preds = self.decoder(enc_out)
+    def forward(self, x, mask):
+        enc_out, (he, ce) = self.encoder(x, mask)
+        #preds = self.decoder(enc_out)
         #print("dec:", preds)
         return preds
     
@@ -159,7 +162,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
 
-        preds = model(x)
+        preds = model(x, fmask)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
         optimizer.zero_grad()
