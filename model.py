@@ -134,7 +134,7 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, mask):
         enc_out, (he, ce) = self.encoder(x, mask)
-        #preds = self.decoder(enc_out)
+        preds = self.decoder(enc_out)
         #print("dec:", preds)
         return preds
     
