@@ -79,10 +79,10 @@ class Attention(nn.Module):
         score = torch.matmul(h_e.T, h_d)
         #print("hid_E:", h_e, "Hid_D:", h_d)
         #print("score:", score)
-        temp1 = torch.exp(score)
-        temp2 = torch.sum(score, dim=0)
-        a_t = temp1/temp2
-        #print("a_t", a_t)
+        #temp1 = torch.exp(score)
+        #temp2 = torch.sum(score, dim=0)
+        a_t = nn.functional.softmax(score, dim=0)
+        print("a_t", a_t)
         '''
         c_t = self.c_t
         for a in a_t:
@@ -111,8 +111,7 @@ class Decoder(nn.Module):
                 self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
-            print("Y", self.y, "dec", self.dec_h)
-            #c_t = self.attention(hidden, self.dec_h)
+            c_t = self.attention(hidden, self.dec_h)
             #print("C_t:", c_t)
             '''
             combined_output = torch.cat([self.dec_h, c_t], 1)
