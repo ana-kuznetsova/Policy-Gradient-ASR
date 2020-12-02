@@ -85,7 +85,7 @@ class Attention(nn.Module):
         #temp1 = torch.exp(score)
         #temp2 = torch.sum(score, dim=0)
         a_t = nn.functional.softmax(score, dim=0)
-        print("a_t", a_t)
+        #print("a_t", a_t)
         '''
         c_t = self.c_t
         for a in a_t:
