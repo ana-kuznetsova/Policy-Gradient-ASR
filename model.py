@@ -55,7 +55,10 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
-        x = torch.nan_to_num(x)
+        #x = torch.nan_to_num(x)
+        temp = torch.isnan(x).flatten()
+        temp = [temp for i in temp if temp]
+        print("NAN", len(temp))
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
