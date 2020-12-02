@@ -75,9 +75,9 @@ class Attention(nn.Module):
         self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
-        print("hid_E:", h_e.shape, "Hid_D:", h_d.shape)
+        print("hid_E:", h_e, "Hid_D:", h_d)
         score = torch.matmul(h_e.T, h_d)
-        #print("score:", score)
+        print("score:", score)
         #temp1 = torch.exp(score)
         #temp2 = torch.sum(score, dim=0)
         a_t = nn.functional.softmax(score, dim=0)
