@@ -55,6 +55,7 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
+        print(x)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -62,7 +63,7 @@ class Encoder(nn.Module):
             out = torch.nn.LeakyReLU()(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
-        print(outputs)
+        #print(outputs)
         #print(torch.isnan(outputs).sum())
         lengths = torch.sum(mask, dim=1)
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
