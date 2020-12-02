@@ -68,7 +68,7 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs, (self.h0, self.c0))
-        output, _ = pad_packed_sequence(output)
+        output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         print("unpacked", output.shape)
         return output, (hn, cn)
     
