@@ -111,8 +111,9 @@ class Decoder(nn.Module):
             c_t = self.attention(hidden, self.dec_h)
             combined_input = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_input)
-            #self.y = self.embed_layer(y_hat)
+            
             output = nn.functional.log_softmax(y_hat, dim=1)
+            self.y = self.embed_layer(y_hat)
             preds.append(output)
         preds = torch.stack(preds)
         return preds
