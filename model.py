@@ -145,6 +145,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
 
     cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
     loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
+    torch.autograd.set_detect_anomaly(True)
 
     for batch in loader:
         x = batch['aud'].to(device)
