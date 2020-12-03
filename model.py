@@ -79,9 +79,9 @@ class Encoder(nn.Module):
 class Attention(nn.Module):
     def __init__(self, batch_size, enc_hidden_size):
         super().__init__()
-        self.register_buffer("c_t", torch.zeros(batch_size, 2*enc_hidden_size))
         
     def forward(self, h_e, h_d):
+        print("He", h_e.shape, "Hd", h_d.shape)
         score = torch.matmul(h_e.T, h_d)
         a_t = nn.functional.softmax(score, dim=0)
         c_t = torch.sum(a_t, dim=0)*h_e 
