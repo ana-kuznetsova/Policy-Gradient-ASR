@@ -159,6 +159,7 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
             loss = criterion(preds, t, input_length, target_length)
+            print("batch loss:", loss)
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
