@@ -57,10 +57,6 @@ class Encoder(nn.Module):
                              num_layers=3, 
                              bidirectional=True)
         self.batch_size = batch_size
-        self.h = None
-        self.c = None
-        #self.register_buffer("h0", torch.randn(3*2, batch_size, 256))
-        #self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
         outputs=[]
@@ -82,8 +78,10 @@ class Attention(nn.Module):
         super().__init__()
         
     def forward(self, h_e, h_d):
-        print("He", h_e.shape, "Hd", h_d.shape)
-        score = torch.matmul(h_e.T, h_d)
+        try:
+            score = torch.matmul(h_e.T, h_d)
+        except RuntimeError:
+            print("He", h_e.shape, "Hd", h_d.shape)
         a_t = nn.functional.softmax(score, dim=0)
         c_t = torch.sum(a_t, dim=0)*h_e 
         return c_t
@@ -150,6 +148,7 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
 
         for batch in loader:
             x = batch['aud'].to(device)
+            print("Batch:", x.shape[0])
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
