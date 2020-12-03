@@ -101,19 +101,17 @@ class Decoder(nn.Module):
 
     def forward(self, enc_h):
         preds = []
-        self.y = self.embed_layer(self.y)
+        y_hat = self.embed_layer(self.y)
         for i, hidden in enumerate(enc_h):
             if i==0:
-                self.dec_h, self.dec_c = self.lstm_cell(self.y)
+                self.dec_h, self.dec_c = self.lstm_cell(y_hat)
             else:
-                self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
+                self.dec_h, self.dec_c = self.lstm_cell(y_hat, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             combined_output = torch.cat([self.dec_h, c_t], 1)
             print("concat", combined_output.shape)
             y_hat = self.output(combined_output)
-            print("y_hat:", y_hat.shape)
-            y_hat = nn.functional.log_softmax(y_hat, dim=1)
-            self.y = self.embed_layer(y_hat)
+            self.y = nn.functional.log_softmax(y_hat, dim=1)
             preds.append(self.y)
         preds = torch.stack(preds)
         return preds
