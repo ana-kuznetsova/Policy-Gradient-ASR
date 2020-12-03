@@ -102,6 +102,7 @@ class Decoder(nn.Module):
     def forward(self, enc_h):
         preds = []
         y_hat = self.embed_layer(self.y)
+        print("y_hat", y_hat.shape)
         for i, hidden in enumerate(enc_h):
             if i==0:
                 self.dec_h, self.dec_c = self.lstm_cell(y_hat)
