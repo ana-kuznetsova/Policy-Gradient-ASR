@@ -97,22 +97,21 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        self.y = torch.nn.Parameter(torch.randn(batch_size,  128, requires_grad=True))
         #self.register_buffer("y", torch.randn(batch_size,  128, requires_grad=True))
 
-    def forward(self, enc_h):
+    def forward(self, enc_h, y):
         preds = []
         for i, hidden in enumerate(enc_h):
             if i==0:
-                self.dec_h, self.dec_c = self.lstm_cell(self.y)
+                self.dec_h, self.dec_c = self.lstm_cell(y)
             else:
-                self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
+                self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
             combined_input = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_input)
             
             output = nn.functional.log_softmax(y_hat, dim=1)
-            self.y = self.embed_layer(y_hat)
+            y = self.embed_layer(y_hat)
             preds.append(output)
         preds = torch.stack(preds)
         return preds
@@ -123,9 +122,9 @@ class Seq2Seq(nn.Module):
         self.encoder = Encoder(batch_size)
         self.decoder = Decoder(batch_size, enc_hidden_size)
 
-    def forward(self, x, mask):
+    def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
-        preds = self.decoder(enc_out)
+        preds = self.decoder(enc_out, dec_input)
         return preds
     
         
@@ -153,8 +152,9 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
+        dec_input = torch.randn(batch_size, 128, requires_grad=True).to(device)
 
-        preds = model(x, fmask)
+        preds = model(x, fmask, dec_input)
         input_length = torch.sum(fmask, dim =1).long().to(device)
         target_length = torch.sum(tmask, dim=1).long().to(device)
         optimizer.zero_grad()
