@@ -30,7 +30,7 @@ class TrainData(data.Dataset):
 
         feat, fmask = self.transforms[0](fname)
         trans, tmask = self.transforms[1](transcript, self.char2ind)
-        sample = {'aud': feat), 'trans': trans, 'fmask':fmask, 'tmask':tmask}
+        sample = {'aud': feat, 'trans': trans, 'fmask':fmask, 'tmask':tmask}
         return sample
     
 def weights(m):
