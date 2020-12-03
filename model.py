@@ -97,23 +97,22 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        self.register_buffer("y", torch.randn(batch_size,  33))
+        self.register_parameter("y", torch.nn.Parameter(
+                                     torch.randn(batch_size,  128, requires_grad=True)))
 
     def forward(self, enc_h):
         preds = []
-        y_hat = self.embed_layer(self.y)
-        print("y_hat", y_hat.shape)
         for i, hidden in enumerate(enc_h):
             if i==0:
-                self.dec_h, self.dec_c = self.lstm_cell(y_hat)
+                self.dec_h, self.dec_c = self.lstm_cell(self.y)
             else:
-                self.dec_h, self.dec_c = self.lstm_cell(y_hat, (self.dec_h, self.dec_c))
+                self.dec_h, self.dec_c = self.lstm_cell(self.y, (self.dec_h, self.dec_c))
             c_t = self.attention(hidden, self.dec_h)
-            combined_output = torch.cat([self.dec_h, c_t], 1)
-            print("concat", combined_output.shape)
-            y_hat = self.output(combined_output)
-            self.y = nn.functional.log_softmax(y_hat, dim=1)
-            preds.append(self.y)
+            combined_input = torch.cat([self.dec_h, c_t], 1)
+            y_hat = self.output(combined_input)
+            y_hat = nn.functional.log_softmax(y_hat, dim=1)
+            self.y = self.embed_layer(y_hat)
+            preds.append(y_hat)
         preds = torch.stack(preds)
         return preds
     
