@@ -77,10 +77,8 @@ class Attention(nn.Module):
         super().__init__()
         
     def forward(self, h_e, h_d):
-        try:
-            score = torch.matmul(h_e.T, h_d)
-        except RuntimeError:
-            print("He", h_e.shape, "Hd", h_d.shape)
+        score = torch.matmul(h_e.T, h_d)
+        print("He", h_e.shape, "Hd", h_d.shape)
         a_t = nn.functional.softmax(score, dim=0)
         c_t = torch.sum(a_t, dim=0)*h_e 
         return c_t
