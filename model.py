@@ -159,6 +159,7 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
         optimizer.zero_grad()
         loss = criterion(preds, t, input_length, target_length)
         print(loss.detach().cpu().numpy())
-        #loss.backward(retain_graph=True)
-        #optimizer.step()
+        loss.backward()
+        #retain_graph=True
+        optimizer.step()
         print("----------------------------------------------------")
