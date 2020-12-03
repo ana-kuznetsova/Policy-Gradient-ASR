@@ -137,7 +137,7 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
 
     cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
-
+    print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
         loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
