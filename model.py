@@ -30,7 +30,7 @@ class TrainData(data.Dataset):
 
         feat, fmask = self.transforms[0](fname)
         trans, tmask = self.transforms[1](transcript, self.char2ind)
-        sample = {'aud': feat, 'trans': trans, 'fmask':fmask, 'tmask':tmask}
+        sample = {'aud': nan_to_num(feat), 'trans': trans, 'fmask':fmask, 'tmask':tmask}
         return sample
     
 def weights(m):
@@ -61,7 +61,6 @@ class Encoder(nn.Module):
         self.register_buffer("c0", torch.randn(3*2, batch_size, 256))
         
     def forward(self, x, mask):
-        x = nan_to_num(x)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
