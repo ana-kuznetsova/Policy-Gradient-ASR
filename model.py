@@ -97,7 +97,6 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        #self.register_buffer("y", torch.randn(batch_size,  128, requires_grad=True))
 
     def forward(self, enc_h, y):
         preds = []
@@ -128,7 +127,7 @@ class Seq2Seq(nn.Module):
         return preds
     
         
-def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256):
+def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_hidden_size=256):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
@@ -143,24 +142,24 @@ def train(csv_path, aud_path, alphabet_path,  batch_size=32, enc_hidden_size=256
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
 
     cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
-    loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
-    torch.autograd.set_detect_anomaly(True)
 
-    for batch in loader:
-        x = batch['aud'].to(device)
-        #print(x.shape)
-        t = batch['trans'].to(device)
-        fmask = batch['fmask'].squeeze(1).to(device)
-        tmask = batch['tmask'].squeeze(1).to(device)
-        dec_input = torch.randn(batch_size, 128, requires_grad=True).to(device)
+    for epoch in range(1, num_epochs+1):
+        epoch_loss = 0
+        loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
 
-        preds = model(x, fmask, dec_input)
-        input_length = torch.sum(fmask, dim =1).long().to(device)
-        target_length = torch.sum(tmask, dim=1).long().to(device)
-        optimizer.zero_grad()
-        loss = criterion(preds, t, input_length, target_length)
-        print(loss.detach().cpu().numpy())
-        loss.backward()
-        #retain_graph=True
-        optimizer.step()
-        print("----------------------------------------------------")
+        for batch in loader:
+            x = batch['aud'].to(device)
+            t = batch['trans'].to(device)
+            fmask = batch['fmask'].squeeze(1).to(device)
+            tmask = batch['tmask'].squeeze(1).to(device)
+            dec_input = torch.randn(batch_size, 128, requires_grad=True).to(device)
+
+            preds = model(x, fmask, dec_input)
+            input_length = torch.sum(fmask, dim =1).long().to(device)
+            target_length = torch.sum(tmask, dim=1).long().to(device)
+            optimizer.zero_grad()
+            loss = criterion(preds, t, input_length, target_length)
+            loss.backward()
+            optimizer.step()
+            epoch_loss+=loss.detach().cpu().numpy()
+        print('Epoch:{:3}/{:3} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
