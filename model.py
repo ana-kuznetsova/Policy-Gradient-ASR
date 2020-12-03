@@ -67,7 +67,6 @@ class Encoder(nn.Module):
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
-        #Pass through LSTM layers
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output, (hn, cn)
