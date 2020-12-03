@@ -84,10 +84,12 @@ class Attention(nn.Module):
     def forward(self, h_e, h_d):
         score = torch.matmul(h_e.T, h_d)
         a_t = nn.functional.softmax(score, dim=0)
-        #c_t = torch.sum(a_t, dim=0)*h_e 
+        c_t = torch.sum(a_t, dim=0)*h_e 
+        '''
         c_t = self.c_t
         for a in a_t:
             c_t+=a*h_e
+        '''
         return c_t
         
     
