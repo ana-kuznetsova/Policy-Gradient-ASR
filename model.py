@@ -144,7 +144,6 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
 
         for batch in loader:
             x = batch['aud'].to(device)
-            print("Batch:", x.shape[0])
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
