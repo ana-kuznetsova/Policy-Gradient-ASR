@@ -97,8 +97,9 @@ class Decoder(nn.Module):
         self.attention = Attention(batch_size, enc_hidden_size)
         self.dec_h = None 
         self.dec_c = None
-        self.register_parameter("y", torch.nn.Parameter(
-                                     torch.randn(batch_size,  128, requires_grad=True)))
+        #self.register_parameter("y", torch.nn.Parameter(
+        #                             torch.randn(batch_size,  128, requires_grad=True)))
+        self.register_buffer("y", torch.randn(batch_size,  128, requires_grad=True))
 
     def forward(self, enc_h):
         preds = []
