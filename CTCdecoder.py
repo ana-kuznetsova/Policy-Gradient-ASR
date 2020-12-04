@@ -114,8 +114,9 @@ class CTCDecoder:
 	
 		best = beam[0]
 		return best[0], -self.logsumexp(*best[1])
-	
-	def test(self):
+
+'''
+	def decode_seq(self):
 		#np.random.seed(3)
 	
 		time = 50
@@ -128,3 +129,4 @@ class CTCDecoder:
 		print(labels)
 		print(''.join([self.alphabet[i] for i in labels]))
 		print("Score {:.3f}".format(score))
+'''

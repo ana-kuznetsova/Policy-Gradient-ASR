@@ -11,6 +11,7 @@ import torchaudio
 from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data import extract_feats, encode_trans
+from CTCdecoder import CTCDecoder
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
@@ -170,7 +171,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
         print('Epoch:{:3}/{:3} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
 
         #Validation
-        print('Starting validation...')
         dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans])
         val_loss = 0
         loader = data.DataLoader(dev_dataset, batch_size=32, shuffle=True)
@@ -200,3 +200,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
+
+
+def predict(test_path, aud_path, alphabet_path, model_path):
+    with open(alphabet_path, 'r') as fo:
+        alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
+    char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
+    print("Char2ind", char2ind)
+    ctc_decoder = CTCDecoder(alphabet)
