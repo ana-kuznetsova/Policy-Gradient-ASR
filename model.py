@@ -85,11 +85,11 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self, alpabet_size):
+    def __init__(self, alphabet_size):
         super().__init__()
         self.embed_layer = nn.Linear(alpabet_size, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
-        self.output = nn.Linear(1024, alpabet_size)
+        self.output = nn.Linear(1024, alphabet_size)
         self.attention = Attention()
         self.dec_h = None 
         self.dec_c = None
@@ -115,7 +115,7 @@ class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size):
         super().__init__()
         self.encoder = Encoder()
-        self.decoder = Decoder(alpabet_size)
+        self.decoder = Decoder(alphabet_size)
 
     def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
