@@ -85,11 +85,11 @@ class Attention(nn.Module):
         
     
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, alpabet_size):
         super().__init__()
-        self.embed_layer = nn.Linear(33, 128)
+        self.embed_layer = nn.Linear(alpabet_size, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
-        self.output = nn.Linear(1024, 33)
+        self.output = nn.Linear(1024, alpabet_size)
         self.attention = Attention()
         self.dec_h = None 
         self.dec_c = None
@@ -112,10 +112,10 @@ class Decoder(nn.Module):
         return preds
     
 class Seq2Seq(nn.Module):
-    def __init__(self):
+    def __init__(self, alphabet_size):
         super().__init__()
         self.encoder = Encoder()
-        self.decoder = Decoder()
+        self.decoder = Decoder(alpabet_size)
 
     def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
@@ -131,7 +131,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq()
+    model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
     model = model.to(device)
 
@@ -211,7 +211,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     ctc_decoder = CTCDecoder(alphabet)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq()
+    model = Seq2Seq(alphabet_size=len(alphabet))
     model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
     model = model.to(device)
 
