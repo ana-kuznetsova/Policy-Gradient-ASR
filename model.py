@@ -16,11 +16,13 @@ from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
 
 class Data(data.Dataset):
-    def __init__(self, csv_path, aud_path, char2ind, transforms):
+    def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
         self.df = pd.read_csv(csv_path, sep='\t')
         self.aud_path = aud_path
         self.char2ind = char2ind
         self.transforms = transforms
+        self.maxlen = maxlen
+        self.maxlent = maxlent
 
     def __len__(self):
         return len(self.df)
@@ -32,8 +34,8 @@ class Data(data.Dataset):
         fname = os.path.join(self.aud_path, self.df['path'][idx])
         transcript = self.df['sentence'][idx].lower()
 
-        feat, fmask = self.transforms[0](fname)
-        trans, tmask = self.transforms[1](transcript, self.char2ind)
+        feat, fmask = self.transforms[0](fname, self.maxlen)
+        trans, tmask = self.transforms[1](transcript, self.char2ind, self.maxlent)
         sample = {'aud': nan_to_num(feat), 'trans': trans, 'fmask':fmask, 'tmask':tmask}
         return sample
     
@@ -125,7 +127,7 @@ class Seq2Seq(nn.Module):
         return preds
     
         
-def train(train_path, dev_path, aud_path, alphabet_path, model_path,
+def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
           num_epochs=10,  batch_size=32):
 
     with open(alphabet_path, 'r') as fo:
@@ -146,7 +148,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
     losses = []
     val_losses = []
 
-    train_dataset = Data(train_path, aud_path, char2ind, [extract_feats, encode_trans])
+    train_dataset = Data(train_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
@@ -173,7 +175,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
         print('Epoch:{:3}/{:3} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
 
         #Validation
-        dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans])
+        dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
         val_loss = 0
         loader = data.DataLoader(dev_dataset, batch_size=32, shuffle=True)
 
@@ -203,7 +205,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
 
 
-def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
+def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines()
     alphabet = [char.strip() for char in alphabet] 
@@ -218,7 +220,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
     model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
     model = model.to(device)
 
-    test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans])
+    test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
     loader = data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     total_WER = 0
