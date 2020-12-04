@@ -6,7 +6,7 @@ import argparse
 def main(args):
    if args.mode=='train':
       train(args.train_path, args.dev_path, args.aud_path, args.alphabet,
-            args.model_path, args.num_epochs, args.batch_size)
+            args.model_path, args.num_epochs=10, args.batch_size=32)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
