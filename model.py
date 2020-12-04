@@ -206,6 +206,23 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     alphabet = [char.strip() for char in alphabet] 
-    print("alphabet", alphabet)
-    
+
+    char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     ctc_decoder = CTCDecoder(alphabet)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = Seq2Seq()
+    model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
+    model = model.to(device)
+
+    test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans])
+    loader = data.DataLoader(test_dataset, batch_size=32, shuffle=True)
+
+    for batch in loader:
+        x = batch['aud'].to(device)
+        t = batch['trans'].to(device)
+        fmask = batch['fmask'].squeeze(1).to(device)
+        tmask = batch['tmask'].squeeze(1).to(device)
+        dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
+        preds = model(x, fmask, dec_input)
+        print("Preds:", preds.shape)
