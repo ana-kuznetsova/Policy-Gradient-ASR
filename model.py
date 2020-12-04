@@ -10,9 +10,11 @@ import torch.utils.data as data
 import torchaudio
 from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+
 from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder
 from CTCdecoder import collapse_fn
+from metrics import evaluate
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
@@ -222,7 +224,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
 
     for batch in loader:
         x = batch['aud'].to(device)
-        t = batch['trans'].to(device)
+        t = batch['trans'].numpy()
         fmask = batch['fmask'].squeeze(1).to(device)
         dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
         preds = model(x, fmask, dec_input)
@@ -235,4 +237,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             seq , score = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
-            print("seq:", seq)
+            target = ''.join([ind2char[ind] for ind in t])
+            print("Target:", target, "Seq:", seq)
+            #cer, wer = evaluate(target, seq)
+            
