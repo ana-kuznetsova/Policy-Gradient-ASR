@@ -190,8 +190,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
 
             val_loss+=loss.detach().cpu().numpy()
         curr_val_loss = val_loss/len(loader)
-        print('Epoch:{:3}/{:3} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
         val_losses.append(curr_val_loss)
+        np.save(os.path.join(model_path, "val_losses.npy"), np.array(val_losses))
+
+        print('Epoch:{:3}/{:3} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
 
         ## Model Selection
         if curr_val_loss < prev_val:
