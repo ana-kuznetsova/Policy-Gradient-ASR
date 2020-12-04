@@ -204,7 +204,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
 
 
-def predict(test_path, aud_path, alphabet_path, model_path):
+def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     alphabet = [char.strip() for char in alphabet] 
@@ -220,9 +220,16 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     model = model.to(device)
 
     test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans])
-    loader = data.DataLoader(test_dataset, batch_size=32, shuffle=True)
+    loader = data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    total_WER = 0
+    total_CER = 0
 
     for batch in loader:
+
+        batch_WER = 0
+        batch_CER = 0
+
         x = batch['aud'].to(device)
         t = batch['trans'].numpy()
         tmask = batch['tmask'].squeeze(1).numpy()
@@ -242,5 +249,9 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             target = t[i][:pad_ind]
             target = ''.join([ind2char[ind] for ind in target])
             cer, wer = evaluate(target, seq)
-            print("CER:", cer, "WER:", wer)
-            
+            batch_CER+=cer
+            batch_WER+=wer
+
+        total_WER+=batch_WER/batch_size
+        total_CER+=batch_CER/batch_size
+    print("CER:", total_CER/len(loader), "WER:", total_WER/len(loader))

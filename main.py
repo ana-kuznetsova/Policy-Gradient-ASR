@@ -9,7 +9,7 @@ def main(args):
       train(args.train_path, args.dev_path, args.aud_path, args.alphabet,
             args.model_path, args.num_epochs, args.batch_size)
    elif args.mode=='predict':
-      predict(args.test_path, args.aud_path, args.alphabet, args.model_path)
+      predict(args.test_path, args.aud_path, args.alphabet, args.model_path, args.batch_size)
 
 
 if __name__ == "__main__":
