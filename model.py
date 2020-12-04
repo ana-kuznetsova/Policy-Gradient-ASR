@@ -2,6 +2,7 @@ import os
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
+import copy
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -11,7 +12,7 @@ from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data import extract_feats, encode_trans
 
-class TrainData(data.Dataset):
+class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
         self.df = pd.read_csv(csv_path, sep='\t')
         self.aud_path = aud_path
@@ -121,7 +122,8 @@ class Seq2Seq(nn.Module):
         return preds
     
         
-def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_hidden_size=256):
+def train(train_path, dev_path, aud_path, alphabet_path, model_path,
+          num_epochs=10,  batch_size=32, enc_hidden_size=256):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
@@ -134,12 +136,18 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    best_model = copy.deepcopy(model.state_dict())
 
-    cv_dataset = TrainData(csv_path, aud_path, char2ind, [extract_feats, encode_trans])
+    init_val_loss = 9999999
+
+    losses = []
+    val_losses = []
+
+    train_dataset = Data(train_path, aud_path, char2ind, [extract_feats, encode_trans])
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
-        loader = data.DataLoader(cv_dataset, batch_size=32, shuffle=True)
+        loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True)
 
         for batch in loader:
             x = batch['aud'].to(device)
@@ -156,4 +164,37 @@ def train(csv_path, aud_path, alphabet_path, num_epochs=10,  batch_size=32, enc_
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
+        
+        losses.append(epoch_loss/len(loader))
+        np.save(os.path.join(model_path, 'train_loss.npy'), np.array(losses))
         print('Epoch:{:3}/{:3} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
+
+        #Validation
+        print('Starting validation...')
+        dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans])
+        val_loss = 0
+        loader = data.DataLoader(dev_dataset, batch_size=32, shuffle=True)
+
+        for batch in loader:
+            x = batch['aud'].to(device)
+            t = batch['trans'].to(device)
+            fmask = batch['fmask'].squeeze(1).to(device)
+            tmask = batch['tmask'].squeeze(1).to(device)
+            dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
+
+            preds = model(x, fmask, dec_input)
+            input_length = torch.sum(fmask, dim =1).long().to(device)
+            target_length = torch.sum(tmask, dim=1).long().to(device)
+            optimizer.zero_grad()
+            loss = criterion(preds, t, input_length, target_length)
+
+            val_loss+=loss.detach().cpu().numpy()
+        curr_val_loss = val_loss/len(loader)
+        print('Epoch:{:3}/{:3} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
+        val_losses.append(curr_val_loss)
+
+        ## Model Selection
+        if curr_val_loss < prev_val:
+            torch.save(best_model, os.path.join(model_path, "model_best.pth"))
+            prev_val = curr_val_loss
+        torch.save(best_model, os.path.join(model_path, "model_last.pth"))
