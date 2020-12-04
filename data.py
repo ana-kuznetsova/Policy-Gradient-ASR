@@ -52,12 +52,13 @@ def preproc(corpus_path):
                 chars.append(char)
     
     for char in chars:
-        if char:
-            continue
-        else:
+        if char==' ':
             temp = chars[0]
             chars[0] = char
             chars.append(temp)
+        else:
+            continue
+
 
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
         for char in chars:
