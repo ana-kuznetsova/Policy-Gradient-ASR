@@ -12,7 +12,7 @@ if __name__ == "__main__":
    parser = argparse.ArgumentParser()
    parser.add_argument('--train_path', type=str, help='Path to train csv')
    parser.add_argument('--dev_path', type=str, help="Path to dev csv")
-   parser.add_argument('--model_path', type=str, help="Directory where model logs and checkpoints will be saved.")
+   parser.add_argument('--model_path', type=str, help="Directory where model logs and checkpoints will be saved.", required=True)
    parser.add_argument('--aud_path', type=str, help='Path to audio files')
    parser.add_argument('--alphabet', type=str, help='Path to alphabet file in .txt format')
    parser.add_argument('--num_epochs', type=int, help="Number of epochs")
