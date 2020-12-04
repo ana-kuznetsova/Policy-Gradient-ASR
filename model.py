@@ -87,7 +87,7 @@ class Attention(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, alphabet_size):
         super().__init__()
-        self.embed_layer = nn.Linear(alpabet_size, 128)
+        self.embed_layer = nn.Linear(alphabet_size, 128)
         self.lstm_cell = nn.LSTMCell(128, 512)
         self.output = nn.Linear(1024, alphabet_size)
         self.attention = Attention()
