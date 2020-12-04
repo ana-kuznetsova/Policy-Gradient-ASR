@@ -241,6 +241,6 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             pad_ind = int(np.sum(tmask[i]))
             target = t[i][:pad_ind]
             target = ''.join([ind2char[ind] for ind in target])
-            print("Target:", target, "Seq:", seq)
-            #cer, wer = evaluate(target, seq)
+            cer, wer = evaluate(target, seq)
+            print("CER:", cer, "WER:", wer)
             
