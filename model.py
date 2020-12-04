@@ -225,6 +225,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     for batch in loader:
         x = batch['aud'].to(device)
         t = batch['trans'].numpy()
+        tmask = batch['tmask'].squeeze(1).numpy()
         fmask = batch['fmask'].squeeze(1).to(device)
         dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
         preds = model(x, fmask, dec_input)
@@ -237,6 +238,8 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             seq , score = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
+            pad_ind = int(np.sum(tmask))
+            t = t[:pad]
             print("t", t)
             target = ''.join([ind2char[ind] for ind in t])
             print("Target:", target, "Seq:", seq)
