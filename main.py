@@ -1,6 +1,6 @@
 from model import train
 from model import predict
-from data import find_maxlen
+from data import find_maxlen, preproc
 import argparse
 
 
@@ -10,6 +10,9 @@ def main(args):
             args.model_path, args.num_epochs, args.batch_size)
    elif args.mode=='predict':
       predict(args.test_path, args.aud_path, args.alphabet, args.model_path, args.batch_size)
+   elif args.mode=='preproc':
+      preproc(args.corpus_path)
+
 
 
 if __name__ == "__main__":
