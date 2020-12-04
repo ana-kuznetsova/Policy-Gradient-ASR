@@ -18,3 +18,13 @@ def edit_dist(s1, s2):
             else:
                 dp[i, j] = 1 + min(dp[i, j-1], dp[i-1, j-1], dp[i-1, j])
     return int(dp[-1, -1]), len(s1)
+
+def evaluate(s1, s2):
+    ed_dist, seq_len = edit_dist(s1, s2)
+    cer = ed_dist/seq_len
+
+    s1 = s1.split(" ")
+    s2 = s2.split(" ")
+    ed_dist, seq_len = edit_dist(s1, s2)
+    wer = ed_dist/seq_len
+    return cer, wer
