@@ -224,9 +224,11 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
 
     total_WER = 0
     total_CER = 0
+    step = 0
 
     for batch in loader:
-
+        step+=1
+        print("Decoding step ", step)
         batch_WER = 0
         batch_CER = 0
 
