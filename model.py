@@ -123,7 +123,7 @@ class Seq2Seq(nn.Module):
     
         
 def train(train_path, dev_path, aud_path, alphabet_path, model_path,
-          num_epochs=10,  batch_size=32, enc_hidden_size=256):
+          num_epochs=10,  batch_size=32):
 
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']

@@ -4,12 +4,19 @@ import argparse
 
 
 def main(args):
-   train(args.csv_path, args.aud_path, args.alphabet)
+   if args.mode=='train':
+      train(args.train_path, args.dev_path, args.aud_path, args.alphabet,
+            args.model_path, args.num_epochs, args.batch_size)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
-   parser.add_argument('--csv_path', type=str, help='Path to csv')
+   parser.add_argument('--train_path', type=str, help='Path to train csv')
+   parser.add_argument('--dev_path', type=str, help="Path to dev csv")
+   parser.add_argument('--model_path', type=str, help="Directory where model logs and checkpoints will be saved.")
    parser.add_argument('--aud_path', type=str, help='Path to audio files')
    parser.add_argument('--alphabet', type=str, help='Path to alphabet file in .txt format')
+   parser.add_argument('--num_epochs', type=int, help="Number of epochs")
+   parser.add_argument('--batch_size', type=int, help='Batch size')
+   parser.add_argument('--mode', type=str, help="Select mode: train, predict")
    args = parser.parse_args()
    main(args)
