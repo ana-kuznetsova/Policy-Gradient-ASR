@@ -226,8 +226,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
         preds = torch.transpose(preds, 0, 1).detach().cpu().numpy()
         fmask = fmask.detach().cpu().numpy()
         
-        for i in enumerate(preds):
-            probs = preds[i]
+        for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
             print(probs.shape, pad_ind)
             seq = ctc_decoder.decode(prob, beam_size=5)
