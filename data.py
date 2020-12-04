@@ -50,12 +50,19 @@ def preproc(corpus_path):
         for char in sent:
             if char not in chars:
                 chars.append(char)
+    
+    for char in chars:
+        if char:
+            continue
+        else:
+            temp = chars[0]
+            chars[0] = char
+            chars.append(temp)
+
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
-        for i in range(len(chars)+1):
-            if i==0:
-                fo.write(' '+'\n')
-            else:
-                fo.write(chars[i-1]+'\n')
+        for char in chars:
+            fo.write(char+'\n')
+        
 
 def extract_feats(path, maxlen=1083):
     '''
