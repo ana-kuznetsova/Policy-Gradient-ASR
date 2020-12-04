@@ -240,9 +240,9 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             seq = collapse_fn(seq)
             pad_ind = int(np.sum(tmask))
             print(pad_ind)
-            t = t[:pad_ind]
-            print("t", t)
-            target = ''.join([ind2char[ind] for ind in t])
-            print("Target:", target, "Seq:", seq)
+            #t = t[:pad_ind]
+            #print("t", t)
+            #target = ''.join([ind2char[ind] for ind in t])
+            #print("Target:", target, "Seq:", seq)
             #cer, wer = evaluate(target, seq)
             
