@@ -196,7 +196,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
         print('Epoch:{:3}/{:3} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
 
         ## Model Selection
-        if curr_val_loss < prev_val:
+        if curr_val_loss < init_val_loss:
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
-            prev_val = curr_val_loss
+            init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
