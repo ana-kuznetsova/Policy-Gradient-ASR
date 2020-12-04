@@ -55,7 +55,7 @@ def preproc(corpus_path):
             if i==0:
                 fo.write(' '+'\n')
             else:
-                fo.write(chars[i]+'\n')
+                fo.write(chars[i-1]+'\n')
 
 def extract_feats(path, maxlen=1083):
     '''
