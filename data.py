@@ -50,18 +50,9 @@ def preproc(corpus_path):
         for char in sent:
             if char not in chars:
                 chars.append(char)
-    
-    for char in chars:
-        if char==' ':
-            temp = chars[0]
-            chars[0] = char
-            chars.append(temp)
-        else:
-            continue
-
 
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
-        for char in chars:
+        for char in sorted(chars):
             fo.write(char+'\n')
         
 
