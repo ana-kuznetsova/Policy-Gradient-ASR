@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 def edit_dist(s1, s2):
     '''
@@ -28,3 +29,9 @@ def evaluate(s1, s2):
     ed_dist, seq_len = edit_dist(s1, s2)
     wer = ed_dist/seq_len
     return cer, wer
+
+def save_predictions(target, predicted, model_path):
+    path = os.path.join(model_path, "predicted.txt")
+    with open(path, 'w') as fo:
+        for i in range(len(target)):
+            fo.write(target[i] + "|" + predicted[i] + '\n')

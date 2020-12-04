@@ -12,9 +12,8 @@ from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from data import extract_feats, encode_trans
-from CTCdecoder import CTCDecoder
-from CTCdecoder import collapse_fn
-from metrics import evaluate
+from CTCdecoder import CTCDecoder, collapse_fn
+from metrics import evaluate, save_predictions
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
@@ -226,6 +225,9 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
     total_CER = 0
     step = 0
 
+    targets = []
+    predicted = []
+
     for batch in loader:
         step+=1
         print("Decoding step ", step)
@@ -250,10 +252,13 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
             pad_ind = int(np.sum(tmask[i]))
             target = t[i][:pad_ind]
             target = ''.join([ind2char[ind] for ind in target])
+            targets.append(target)
+            predicted.append(seq)
             cer, wer = evaluate(target, seq)
             batch_CER+=cer
             batch_WER+=wer
 
         total_WER+=batch_WER/batch_size
         total_CER+=batch_CER/batch_size
+    save_predictions(targets, predicted)
     print("CER:", total_CER/len(loader), "WER:", total_WER/len(loader))
