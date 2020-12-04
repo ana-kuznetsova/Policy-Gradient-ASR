@@ -205,6 +205,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
 def predict(test_path, aud_path, alphabet_path, model_path):
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
+    print("alphabet", alphabet)
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     print("Char2ind", char2ind)
     ctc_decoder = CTCDecoder(alphabet)
