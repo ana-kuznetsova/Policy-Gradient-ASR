@@ -4,6 +4,8 @@ import torch
 import torchaudio
 import torch.nn as nn
 from tqdm import tqdm
+import pandas as pd
+from string import punctuation
 
 
 def find_maxlen(path):
@@ -17,6 +19,43 @@ def find_maxlen(path):
             maxlen = size
     print("Maxlen:", maxlen)
 
+def preproc(corpus_path):
+    train = pd.read_csv(os.path.join(corpus_path, 'train.tsv'), sep='\t')
+    dev = pd.read_csv(os.path.join(corpus_path,'dev.tsv'), sep='\t')
+    test = pd.read_csv(os.path.join(corpus_path,'test.tsv'), sep='\t')
+    
+    ## Remove punct
+    train_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+                   for sent in train['sentence']]
+    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation])\
+                   for sent in dev['sentence']]
+    
+    test_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+                   for sent in test['sentence']]
+    
+    ##Write modified df
+    train['sentence'] = train_sents
+    train.to_csv(os.path.join(corpus_path, 'train.tsv'), sep='\t')
+    
+    dev['sentence'] = dev_sents
+    dev.to_csv(os.path.join(corpus_path, 'dev.tsv'), sep='\t')
+    
+    test['sentence'] = test_sents
+    test.to_csv(os.path.join(corpus_path, 'test.tsv'), sep='\t')
+    
+    #Make alphabet
+    chars = []
+    sents = train_sents + dev_sents + test_sents
+    for sent in sents:
+        for char in sent:
+            if char not in chars:
+                chars.append(char)
+    with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
+        for i in range(len(chars)+1):
+            if i==0:
+                fo.write(' '+'\n')
+            else:
+                fo.write(chars[i]+'\n')
 
 def extract_feats(path, maxlen=1083):
     '''
@@ -52,27 +91,3 @@ def encode_trans(trans, char2ind, maxlen_t=7):
     res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(-1))
     mask = [1 if i>=0 else 0 for i in res]
     return torch.tensor(res), torch.tensor(mask) 
-
-
-def collapse_fn(preds, masks):
-    preds = preds.detach().cpu().numpy()
-    masks = masks.detach().cpu().numpy()
-    collapsed = []
-    maxlen_t = 0
-    for pred, mask in zip(preds, masks):
-        temp = [pred[0]]
-        for i, char in enumerate(pred[1:]):
-            if mask[i]:
-                if pred[i-1]==char:
-                    continue
-                else:
-                    temp.append(char)
-        collapsed.append(temp)
-        maxlen_t = max(maxlen_t, len(temp))
-    
-    res = []
-    for sent in collapsed:
-        sent = np.pad(sent, (0, maxlen_t - len(sent)), 'constant', constant_values=(-1))
-        res.append(sent)
-        
-    return torch.tensor(res)
