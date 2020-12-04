@@ -238,8 +238,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             seq , score = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
-            print(tmask)
-            pad_ind = int(np.sum(tmask))
+            pad_ind = int(np.sum(tmask[i]))
             print(pad_ind)
             #t = t[:pad_ind]
             #print("t", t)
