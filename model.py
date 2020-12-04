@@ -129,7 +129,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
           num_epochs=10,  batch_size=32):
 
     with open(alphabet_path, 'r') as fo:
-        alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
+        alphabet = fo.readlines() 
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -205,7 +205,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
     with open(alphabet_path, 'r') as fo:
-        alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
+        alphabet = fo.readlines()
     alphabet = [char.strip() for char in alphabet] 
 
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
