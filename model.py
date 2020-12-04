@@ -260,5 +260,5 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size):
 
         total_WER+=batch_WER/batch_size
         total_CER+=batch_CER/batch_size
-    save_predictions(targets, predicted)
+    save_predictions(targets, predicted, model_path)
     print("CER:", total_CER/len(loader), "WER:", total_WER/len(loader))
