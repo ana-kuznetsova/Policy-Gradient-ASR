@@ -228,6 +228,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
         
         for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
+            probs = probs[:pad_ind,]
             print(probs.shape, pad_ind)
             seq = ctc_decoder.decode(prob, beam_size=5)
             print("Seq:", seq)
