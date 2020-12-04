@@ -207,7 +207,8 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     alphabet = [char.strip() for char in alphabet] 
 
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
-    print(char2ind)
+    ind2char = {char2ind[key]:key for key in char2ind}
+    print(ind2char)
     ctc_decoder = CTCDecoder(alphabet)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
