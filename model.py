@@ -185,7 +185,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path,
             preds = model(x, fmask, dec_input)
             input_length = torch.sum(fmask, dim =1).long().to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
-            optimizer.zero_grad()
             loss = criterion(preds, t, input_length, target_length)
 
             val_loss+=loss.detach().cpu().numpy()
