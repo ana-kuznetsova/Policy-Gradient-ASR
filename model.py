@@ -208,7 +208,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
 
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
-    print(ind2char)
+
     ctc_decoder = CTCDecoder(alphabet)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -232,5 +232,5 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             pad_ind = int(np.sum(fmask[i]))
             probs = np.exp(probs[:pad_ind,])
             seq , score = ctc_decoder.decode(probs, beam_size=5)
-            seq = ' '.join([char2ind[ind] for ind in seq])
+            seq = ' '.join([ind2char[ind] for ind in seq])
             print("seq", seq)
