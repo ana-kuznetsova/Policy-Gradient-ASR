@@ -6,7 +6,7 @@ import argparse
 def main(args):
    if args.mode=='train':
       train(args.train_path, args.dev_path, args.aud_path, args.alphabet,
-            args.model_path, args.num_epochs=10, args.batch_size=32)
+            args.model_path, args.num_epochs, args.batch_size)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
@@ -15,8 +15,8 @@ if __name__ == "__main__":
    parser.add_argument('--model_path', type=str, help="Directory where model logs and checkpoints will be saved.", required=True)
    parser.add_argument('--aud_path', type=str, help='Path to audio files', required=True)
    parser.add_argument('--alphabet', type=str, help='Path to alphabet file in .txt format', required=True)
-   parser.add_argument('--num_epochs', type=int, help="Number of epochs")
-   parser.add_argument('--batch_size', type=int, help='Batch size')
+   parser.add_argument('--num_epochs', nargs='?', const=10, type=int, help="Number of epochs")
+   parser.add_argument('--batch_size', nargs='?', const=32, type=int, help='Batch size')
    parser.add_argument('--mode', type=str, help="Select mode: train, predict", required=True)
    args = parser.parse_args()
    main(args)
