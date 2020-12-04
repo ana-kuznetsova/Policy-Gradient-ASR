@@ -219,12 +219,12 @@ def predict(test_path, aud_path, alphabet_path, model_path):
 
     for batch in loader:
         x = batch['aud'].to(device)
-        t = batch['trans'].to(device)
-        fmask = batch['fmask'].squeeze(1).to(device)
-        tmask = batch['tmask'].squeeze(1).to(device)
+        t = batch['trans'].numpy()
+        fmask = batch['fmask'].squeeze(1).numpy()
         dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
         preds = model(x, fmask, dec_input)
         preds = torch.transpose(preds, 0, 1).detach().cpu().numpy()
+        print(preds.shape, fmask.shape)
         
         for prob in preds:
             seq = ctc_decoder.decode(prob, beam_size=5)
