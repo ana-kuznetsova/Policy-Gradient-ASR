@@ -115,18 +115,17 @@ class CTCDecoder:
 		best = beam[0]
 		return best[0], -self.logsumexp(*best[1])
 
-'''
-	def decode_seq(self):
-		#np.random.seed(3)
-	
-		time = 50
-		output_dim = len(self.alphabet)
-	
-		probs = np.random.rand(time, output_dim)
-		probs = probs / np.sum(probs, axis=1, keepdims=True)
-	
-		labels, score = self.decode(probs)
-		print(labels)
-		print(''.join([self.alphabet[i] for i in labels]))
-		print("Score {:.3f}".format(score))
-'''
+
+def collapse_fn(preds):
+    seq = ''
+    prev = ''
+    for char in preds:
+        if not prev:
+            prev = char
+            seq+=char
+        if char==prev:
+            continue
+        else:
+            prev=char
+            seq+=char
+    return seq

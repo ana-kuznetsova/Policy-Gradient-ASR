@@ -12,6 +12,7 @@ from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder
+from CTCdecoder import collapse_fn
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms):
@@ -233,4 +234,5 @@ def predict(test_path, aud_path, alphabet_path, model_path):
             probs = np.exp(probs[:pad_ind,])
             seq , score = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
+            seq = collapse_fn(seq)
             print("seq:", seq)
