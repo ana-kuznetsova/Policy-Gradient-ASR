@@ -206,7 +206,7 @@ def predict(test_path, aud_path, alphabet_path, model_path):
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() + ['f', 'i', 'r', 'e', 'o', 'x']
     alphabet = [char.strip() for char in alphabet] 
-
+    print("alphabet:", len(alphabet))
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     ctc_decoder = CTCDecoder(alphabet)
     
@@ -225,4 +225,5 @@ def predict(test_path, aud_path, alphabet_path, model_path):
         tmask = batch['tmask'].squeeze(1).to(device)
         dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
         preds = model(x, fmask, dec_input)
+        preds = torch.transpose(preds, 0, 1)
         print("Preds:", preds.shape)
