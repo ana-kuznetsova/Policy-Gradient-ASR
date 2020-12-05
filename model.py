@@ -157,7 +157,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         step = 0
         for batch in loader:
             step+=1
-            print("Step{}/{}".format(step, num_steps))
+            print("Step {}/{}".format(step, num_steps))
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
@@ -175,7 +175,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         
         losses.append(epoch_loss/len(loader))
         np.save(os.path.join(model_path, 'train_loss.npy'), np.array(losses))
-        print('Epoch:{:3}/{:3} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
+        print('Epoch:{}/{} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
 
         #Validation
         dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
@@ -199,7 +199,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         val_losses.append(curr_val_loss)
         np.save(os.path.join(model_path, "val_losses.npy"), np.array(val_losses))
 
-        print('Epoch:{:3}/{:3} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
+        print('Epoch:{}/{} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
 
         ## Model Selection
         if curr_val_loss < init_val_loss:
@@ -266,4 +266,4 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         total_WER+=batch_WER/batch_size
         total_CER+=batch_CER/batch_size
     save_predictions(targets, predicted, model_path)
-    print("CER:", total_CER/len(loader), "WER:", total_WER/len(loader))
+    print("CER: {:>4f} WER: {:>4f}".format(total_CER/len(loader), total_WER/len(loader)))
