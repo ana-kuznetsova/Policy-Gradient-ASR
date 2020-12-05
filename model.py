@@ -30,8 +30,7 @@ class Data(data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-            print("ind", idx)
-        
+
         fname = os.path.join(self.aud_path, self.df['path'][idx])
         transcript = self.df['sentence'][idx].lower()
 
