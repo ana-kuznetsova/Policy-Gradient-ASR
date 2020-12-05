@@ -7,7 +7,7 @@ import argparse
 def main(args):
    if args.mode=='train':
       train(args.train_path, args.dev_path, args.aud_path, args.alphabet,
-            args.model_path, args.num_epochs, args.batch_size, args.maxlen, args.maxlent)
+            args.model_path, args.maxlen, args.maxlent, args.num_epochs, args.batch_size)
    elif args.mode=='predict':
       predict(args.test_path, args.aud_path, args.alphabet, args.model_path, 
               args.batch_size, args.maxlen, args.maxlent)
