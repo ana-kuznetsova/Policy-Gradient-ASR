@@ -153,8 +153,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
         loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True)
-
+        num_steps = len(loader)
+        step = 0
         for batch in loader:
+            step+=1
+            print("Step{}/{}".format(step, num_steps))
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
