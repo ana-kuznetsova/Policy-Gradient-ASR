@@ -24,7 +24,7 @@ def preproc(corpus_path):
     dev = pd.read_csv(os.path.join(corpus_path,'dev.tsv'), sep='\t')
     test = pd.read_csv(os.path.join(corpus_path,'test.tsv'), sep='\t')
 
-    punctuation+='«»½“”…'
+    punctuation = punctuation + '«»½“”…'
     
     ## Remove punct
     train_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
