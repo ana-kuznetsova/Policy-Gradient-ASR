@@ -134,7 +134,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         alphabet = fo.readlines() 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
     model = model.to(device)
