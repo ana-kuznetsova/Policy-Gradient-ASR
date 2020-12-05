@@ -5,7 +5,6 @@ import torchaudio
 import torch.nn as nn
 from tqdm import tqdm
 import pandas as pd
-from string import punctuation
 
 
 def find_maxlen(path):
@@ -20,6 +19,8 @@ def find_maxlen(path):
     print("Maxlen:", maxlen)
 
 def preproc(corpus_path):
+    from string import punctuation
+    
     train = pd.read_csv(os.path.join(corpus_path, 'train.tsv'), sep='\t')
     dev = pd.read_csv(os.path.join(corpus_path,'dev.tsv'), sep='\t')
     test = pd.read_csv(os.path.join(corpus_path,'test.tsv'), sep='\t')
