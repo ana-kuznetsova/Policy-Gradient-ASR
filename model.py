@@ -154,7 +154,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
-        loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+        loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         num_steps = len(loader)
         step = 0
         for batch in loader:
@@ -184,7 +184,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         #Validation
         dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
         val_loss = 0
-        loader = data.DataLoader(dev_dataset, batch_size=32, shuffle=True)
+        loader = data.DataLoader(dev_dataset, batch_size=batch_size, shuffle=True)
 
         for batch in loader:
             x = batch['aud'].to(device)
