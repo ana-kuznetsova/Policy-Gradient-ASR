@@ -62,6 +62,7 @@ class Encoder(nn.Module):
                              num_layers=3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
+        self.drop_lstm = nn.Dropout(p=0.3)
         
     def forward(self, x, mask):
         outputs=[]
@@ -75,6 +76,7 @@ class Encoder(nn.Module):
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
+        output = self.drop_lstm(output)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output, (hn, cn)
     
@@ -98,6 +100,7 @@ class Decoder(nn.Module):
         self.attention = Attention()
         self.dec_h = None 
         self.dec_c = None
+        self.drop_lstm = nn.Dropout(p=0.3)
 
     def forward(self, enc_h, y):
         preds = []
@@ -106,6 +109,7 @@ class Decoder(nn.Module):
                 self.dec_h, self.dec_c = self.lstm_cell(y)
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
+            self.dec_h = self.drop_lstm(self.dec_h)
             c_t = self.attention(hidden, self.dec_h)
             combined_input = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_input)
