@@ -14,3 +14,13 @@ def reward(true_y, pred_y, t, ind2char, ctc_decoder):
     elif t==1:
         r_t = - (edit_dist(true_y, pred_y[:t+1]) - len(true_y))
     return r_t
+
+def sample_trans(m, probs):
+    '''
+    Samples M transcriptions from the probability distribution:
+    e.g. softmax output.
+    Args:
+        m: number of samples
+        probs: softmax output for current training example
+    '''
+    pass
