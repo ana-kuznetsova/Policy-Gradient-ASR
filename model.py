@@ -172,6 +172,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
             preds = model(x, fmask, dec_input)
             input_length = torch.sum(fmask, dim =1).long().to(device)
+            print("inp:", input_length.shape)
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
             loss = criterion(preds, t, input_length, target_length)
