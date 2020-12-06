@@ -8,15 +8,19 @@ import pandas as pd
 
 
 def find_maxlen(path):
+    distribution = []
     fnames = os.listdir(path)
     maxlen = 0
     for n in tqdm(fnames):
         waveform, sample_rate = torchaudio.load(os.path.join(path, n))
         mfcc = torchaudio.transforms.MFCC()(waveform)
         size = mfcc.shape[2]
+        distribution.append(size)
         if size > maxlen:
             maxlen = size
-    print("Maxlen:", maxlen)
+    fname = n.split('.')[0]
+    np.save(ps.path.join(path, fname), np.array(distribution))
+    print("Maxlen:", maxlen, n)
 
 def preproc(corpus_path):
     from string import punctuation
