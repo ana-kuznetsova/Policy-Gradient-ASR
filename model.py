@@ -178,7 +178,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
             loss = criterion(preds, t, input_length, target_length)
-            print("Step {}/{}. Loss: {}".format(step, num_steps, loss.detach().cpu().numpy()))
+            print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
