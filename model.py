@@ -136,9 +136,13 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         alphabet = fo.readlines() 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
+
+    if torch.cuda.device_count() > 1:
+        print("Using", torch.cuda.device_count(), "GPUs...")
+        model = nn.DataParallel(model)
     model = model.to(device)
 
     criterion = nn.CTCLoss(zero_infinity=True)
