@@ -130,6 +130,8 @@ class Seq2Seq(nn.Module):
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
           num_epochs=10,  batch_size=32):
 
+    print("Num epochs:", num_epochs, "Batch size:", batch_size)
+
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
