@@ -62,7 +62,6 @@ class Encoder(nn.Module):
                              num_layers=3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
-        self.drop_lstm = nn.Dropout(p=0.3)
         
     def forward(self, x, mask):
         outputs=[]
@@ -76,7 +75,6 @@ class Encoder(nn.Module):
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
-        output = self.drop_lstm(output)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output, (hn, cn)
     
