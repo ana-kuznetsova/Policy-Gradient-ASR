@@ -19,7 +19,7 @@ def find_maxlen(path):
         if size > maxlen:
             maxlen = size
     fname = n.split('.')[0]
-    np.save(ps.path.join(path, fname), np.array(distribution))
+    np.save(os.path.join(path, fname), np.array(distribution))
     print("Maxlen:", maxlen, n)
 
 def preproc(corpus_path):
