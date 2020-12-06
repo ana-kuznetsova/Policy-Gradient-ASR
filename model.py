@@ -61,6 +61,7 @@ class Encoder(nn.Module):
                              hidden_size=256, 
                              num_layers=3, 
                              bidirectional=True)
+        self.drop = nn.Dropout()
         
     def forward(self, x, mask):
         outputs=[]
@@ -68,6 +69,7 @@ class Encoder(nn.Module):
             feature = x[:,:,i]
             out = self.input_layer(feature)
             out = torch.nn.LeakyReLU()(out)
+            out = self.drop(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
