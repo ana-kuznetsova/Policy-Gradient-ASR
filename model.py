@@ -172,6 +172,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
+            del batch
+            del x
+            del t
+            del preds
+            del fmask
+            del tmask
             torch.cuda.empty_cache()
         
         losses.append(epoch_loss/len(loader))
