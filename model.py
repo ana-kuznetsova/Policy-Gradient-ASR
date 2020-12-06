@@ -139,11 +139,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
 
-    '''
+
     if torch.cuda.device_count() > 1:
         print("Using", torch.cuda.device_count(), "GPUs...")
-        model = nn.DataParallel(model, device_ids=[0, 1])
-    '''
+        model = nn.DataParallel(model)
     model = model.to(device)
 
     criterion = nn.CTCLoss(zero_infinity=True)
