@@ -166,7 +166,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         step = 0
         for batch in loader:
             step+=1
-            print("Step {}/{}".format(step, num_steps))
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
@@ -179,6 +178,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
             loss = criterion(preds, t, input_length, target_length)
+            print("Step {}/{}. Loss: {}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
