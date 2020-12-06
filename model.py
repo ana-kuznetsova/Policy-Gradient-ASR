@@ -196,6 +196,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             loss = criterion(preds, t, input_length, target_length)
 
             val_loss+=loss.detach().cpu().numpy()
+            torch.cuda.empty_cache() 
         curr_val_loss = val_loss/len(loader)
         val_losses.append(curr_val_loss)
         np.save(os.path.join(model_path, "val_losses.npy"), np.array(val_losses))
