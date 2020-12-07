@@ -32,12 +32,12 @@ def preproc(corpus_path):
     punctuation = punctuation + '«»½“”…'
     
     ## Remove punct
-    train_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+    train_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in train['sentence']]
-    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation])\
+    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in dev['sentence']]
     
-    test_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+    test_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in test['sentence']]
     
     ##Write modified df
@@ -57,6 +57,8 @@ def preproc(corpus_path):
         for char in sent:
             if char not in chars:
                 chars.append(char)
+    chars.append(".")
+    print(sorted(chars))
 
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
         for char in sorted(chars):
