@@ -59,8 +59,10 @@ def preproc(corpus_path):
                 chars.append(char)
 
     chars = sorted(chars)
-    chars =  ["."] + chars
-
+    temp = chars[0]
+    chars[0] = chars[1]
+    chars[1] = temp
+    print(chars)
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
         for char in chars:
             fo.write(char+'\n')
