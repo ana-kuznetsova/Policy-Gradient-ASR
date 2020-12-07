@@ -174,7 +174,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
-
+            print("before model:", x.shape, t.shape)
             preds = model(x, fmask, dec_input)
             input_length = torch.sum(fmask, dim =1).long().to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
