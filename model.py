@@ -65,7 +65,7 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         outputs=[]
-        print("RNN", feature.shape[1], mask.shape[1])
+        print("RNN", x.shape[1], mask.shape[1])
         for i in range(x.shape[2]):
             feature = x[:,:,i]
             out = self.input_layer(feature)
