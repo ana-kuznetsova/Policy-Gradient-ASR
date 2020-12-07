@@ -71,6 +71,7 @@ class Encoder(nn.Module):
             out = torch.nn.LeakyReLU()(out)
             out = self.drop(out)
             outputs.append(out)
+            print("RNN", feature.shape[1], mask.shape[1])
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
@@ -172,6 +173,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
+            print("train loop:", x.shape[1], fmask.shape[1])
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
 
             preds = model(x, fmask, dec_input)
