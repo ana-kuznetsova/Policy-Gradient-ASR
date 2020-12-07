@@ -67,11 +67,13 @@ class Encoder(nn.Module):
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
+            print("enc feat:", feature.shape)
             out = self.input_layer(feature)
             out = torch.nn.LeakyReLU()(out)
             out = self.drop(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
+        print("enc outs", outputs.shape)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
@@ -179,7 +181,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             input_length = torch.sum(fmask, dim =1).long().to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
-            print("goes to loss:", preds.shape, t.shape, input_length.shape, target_length.shape)
+            #print("goes to loss:", preds.shape, t.shape, input_length.shape, target_length.shape)
             loss = criterion(preds, t, input_length, target_length)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
