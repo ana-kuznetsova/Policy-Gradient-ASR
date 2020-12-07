@@ -57,11 +57,12 @@ def preproc(corpus_path):
         for char in sent:
             if char not in chars:
                 chars.append(char)
-    chars.append(".")
-    print(sorted(chars))
+
+    chars = sorted(chars)
+    chars =  ["."] + chars
 
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
-        for char in sorted(chars):
+        for char in chars:
             fo.write(char+'\n')
         
 
