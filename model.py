@@ -67,17 +67,16 @@ class Encoder(nn.Module):
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
-            print("enc feat:", feature.shape)
             out = self.input_layer(feature)
             out = torch.nn.LeakyReLU()(out)
             out = self.drop(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
-        print("enc outs", outputs.shape)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
+        print("enc out:", output.shape)
         return output, (hn, cn)
     
 class Attention(nn.Module):
