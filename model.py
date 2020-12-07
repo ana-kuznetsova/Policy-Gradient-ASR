@@ -65,16 +65,12 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         outputs=[]
-        print("RNN", x.shape[1], mask.shape[1])
-        try:
-            for i in range(x.shape[2]):
-                feature = x[:,:,i]
-                out = self.input_layer(feature)
-                out = torch.nn.LeakyReLU()(out)
-                out = self.drop(out)
-                outputs.append(out)
-        except RuntimeError:
-            print("Error RNN", x.shape[1], mask.shape[1])
+        for i in range(x.shape[2]):
+            feature = x[:,:,i]
+            out = self.input_layer(feature)
+            out = torch.nn.LeakyReLU()(out)
+            out = self.drop(out)
+            outputs.append(out)
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
@@ -176,14 +172,13 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-            print("train loop:", x.shape[1], fmask.shape[1])
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
 
             preds = model(x, fmask, dec_input)
             input_length = torch.sum(fmask, dim =1).long().to(device)
-            #print("inp:", input_length.shape)
             target_length = torch.sum(tmask, dim=1).long().to(device)
             optimizer.zero_grad()
+            print("goes to loss:", preds.shape, t.shape, input_length.shape, target_length.shape)
             loss = criterion(preds, t, input_length, target_length)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
