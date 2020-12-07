@@ -65,13 +65,13 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         outputs=[]
+        print("RNN", feature.shape[1], mask.shape[1])
         for i in range(x.shape[2]):
             feature = x[:,:,i]
             out = self.input_layer(feature)
             out = torch.nn.LeakyReLU()(out)
             out = self.drop(out)
             outputs.append(out)
-            print("RNN", feature.shape[1], mask.shape[1])
         outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
