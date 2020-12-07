@@ -111,12 +111,11 @@ class Decoder(nn.Module):
             c_t = self.attention(hidden, self.dec_h)
             combined_input = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_input)
-            print("y_hat", y_hat.shape)
             output = nn.functional.log_softmax(y_hat, dim=1)
-            print("dec out:", output.shape)
             y = self.embed_layer(y_hat)
             preds.append(output)
         preds = torch.stack(preds)
+        print(preds.shape)
         return preds
     
 class Seq2Seq(nn.Module):
