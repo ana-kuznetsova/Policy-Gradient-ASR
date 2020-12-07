@@ -137,16 +137,18 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     with open(alphabet_path, 'r') as fo:
         alphabet = fo.readlines() 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
+    print("alphabet:", alphabet)
+    print(char2ind)
     
+    '''
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
 
-    '''
     if torch.cuda.device_count() > 1:
         print("Using", torch.cuda.device_count(), "GPUs...")
         model = nn.DataParallel(model)
-    '''
+    
 
 
     model = model.to(device)
@@ -223,6 +225,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
+        '''
 
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
