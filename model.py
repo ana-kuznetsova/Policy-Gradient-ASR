@@ -76,7 +76,6 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
-        print("enc out:", output.shape)
         return output, (hn, cn)
     
 class Attention(nn.Module):
@@ -109,6 +108,7 @@ class Decoder(nn.Module):
             else:
                 self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
             self.dec_h = self.drop_lstm(self.dec_h)
+            print("decoder h:", self.dec_h.shape)
             c_t = self.attention(hidden, self.dec_h)
             combined_input = torch.cat([self.dec_h, c_t], 1)
             y_hat = self.output(combined_input)
