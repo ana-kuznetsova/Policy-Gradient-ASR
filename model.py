@@ -115,7 +115,6 @@ class Decoder(nn.Module):
             y = self.embed_layer(y_hat)
             preds.append(output)
         preds = torch.stack(preds)
-        print(preds.shape)
         return preds
     
 class Seq2Seq(nn.Module):
@@ -143,11 +142,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
 
-    '''
+
     if torch.cuda.device_count() > 1:
         print("Using", torch.cuda.device_count(), "GPUs...")
         model = nn.DataParallel(model)
-    '''
+
 
     model = model.to(device)
 
