@@ -133,7 +133,8 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
-        print("enc_out", enc_out.shape)
+        enc_out = torch.transpose(enc_out, 0, 1)
+        print(enc_out.shape)
         preds = self.decoder(enc_out, dec_input)
         return preds
 
