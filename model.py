@@ -59,7 +59,8 @@ class Encoder(nn.Module):
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
-                             num_layers=3, 
+                             num_layers=3,
+                             dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
         
@@ -127,8 +128,8 @@ class Seq2Seq(nn.Module):
         enc_out, (he, ce) = self.encoder(x, mask)
         preds = self.decoder(enc_out, dec_input)
         return preds
-    
-        
+
+
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
           num_epochs=10,  batch_size=32):
 
@@ -139,25 +140,17 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
-    print("alphabet:", alphabet)
-    print(ind2char)
-    
-    '''
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(alphabet_size=len(alphabet))
     model.apply(weights)
-
-    if torch.cuda.device_count() > 1:
-        print("Using", torch.cuda.device_count(), "GPUs...")
-        model = nn.DataParallel(model)
-    
-
 
     model = model.to(device)
 
     criterion = nn.CTCLoss(zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
+    
 
     init_val_loss = 9999999
 
@@ -175,6 +168,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
+            print("target", t)
+    '''
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
