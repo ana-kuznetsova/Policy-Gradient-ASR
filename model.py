@@ -14,6 +14,9 @@ from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
         self.df = pd.read_csv(csv_path, sep='\t')
