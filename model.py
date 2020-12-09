@@ -153,6 +153,7 @@ class AttnDecoderRNN(nn.Module):
             dec_hid = encoder_outputs[-1]
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
+        dec_outputs = []
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             embedded = self.embedding(input_i)
@@ -162,17 +163,21 @@ class AttnDecoderRNN(nn.Module):
             attn_applied_i = torch.bmm(attn_weights_i.unsqueeze(1),
                                     encoder_outputs)
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
-            print(output_i.shape)
+            output_i = self.attn_combine(output_i).unsqueeze(1)
+            output_i = F.relu(output_i)
+            output_i, (dec_hid, _) = self.lstm(output_i, dec_hid)
+            output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
+            dec_outputs.append(output_i)
+
+        dec_outputs =  torch.stack(dec_outputs)
+        print(dec_outputs.shape)
 
         '''
 
         
-        output = self.attn_combine(output).unsqueeze(0)
 
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
 
-        output = F.log_softmax(self.out(output[0]), dim=1)
+        
         return output, hidden, attn_weights
         '''
 
