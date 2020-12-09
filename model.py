@@ -133,7 +133,7 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
-        print("enc_out", enc_out)
+        print("enc_out", enc_out.shape)
         preds = self.decoder(enc_out, dec_input)
         return preds
 
