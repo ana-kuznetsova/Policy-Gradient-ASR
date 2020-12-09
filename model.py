@@ -149,7 +149,9 @@ class AttnDecoderRNN(nn.Module):
     def forward(self, input, hidden, encoder_outputs):
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
+        print(embedded.shape)
 
+        '''
         attn_weights = F.softmax(
             self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
@@ -163,6 +165,7 @@ class AttnDecoderRNN(nn.Module):
 
         output = F.log_softmax(self.out(output[0]), dim=1)
         return output, hidden, attn_weights
+        '''
 
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
@@ -224,10 +227,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
+            print(t.shape)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
-            print(enc_out.shape)
+
 
             '''
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
