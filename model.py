@@ -150,8 +150,6 @@ class AttnDecoderRNN(nn.Module):
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
-            lenghts = torch.ones(input_i.shape)
-            input_i = pack_padded_sequence(input_i, lenghts, enforce_sorted=False)
             print(max(input_i), min(input_i))
             embedded = self.embedding(input_i)
             #embedded = self.dropout(embedded)
@@ -197,7 +195,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
 
     with open(alphabet_path, 'r') as fo:
-        alphabet = fo.readlines() 
+        alphabet = fo.readlines() + '<pad>'
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     print(len(alphabet))
