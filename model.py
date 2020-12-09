@@ -151,9 +151,9 @@ class AttnDecoderRNN(nn.Module):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             print(max(input_i), min(input_i))
-            embedded = self.embedding(input_i)
+            #embedded = self.embedding(input_i)
             #embedded = self.dropout(embedded)
-            print(embedded.shape)
+           # print(embedded.shape)
 
         '''
         attn_weights = F.softmax(
