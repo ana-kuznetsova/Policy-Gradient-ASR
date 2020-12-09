@@ -148,11 +148,15 @@ class AttnDecoderRNN(nn.Module):
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
+        if not dec_hid:
+            dec_hid = encoder_outputs[:, -1, :]
+            print('dec_h', dec_hid.shape)
+
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             embedded = self.embedding(input_i)
-            #embedded = self.dropout(embedded)
-            print(embedded.shape)
+            embedded = self.dropout(embedded)
+            combined_input_i = torch.cat((embedded[0], encoder_outputs[0]), 1)
 
         '''
         attn_weights = F.softmax(
