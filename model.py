@@ -181,6 +181,7 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, t, fmask, device, dec_input=None):
         enc_out = self.encoder(x, fmask)
+        print(torch.sum(enc_out))
         dec_out = self.decoder(t, enc_out, device=device)
         return dec_out
 
