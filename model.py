@@ -148,11 +148,12 @@ class AttnDecoderRNN(nn.Module):
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, target_inputs, encoder_outputs, dec_hid=None):
+    def forward(self, target_inputs, encoder_outputs, dec_hid=None, device=None):
         if not dec_hid:
             dec_hid = encoder_outputs[-1]
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
+        c_i = torch.zeros(dec_hid.shape).to(device)
         dec_outputs = []
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
@@ -165,9 +166,7 @@ class AttnDecoderRNN(nn.Module):
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
             output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
-            print(output_i.shape, dec_hid.unsqueeze(0).shape)
-            dec_hid = dec_hid.unsqueeze(0)
-            output_i, (dec_hid, _) = self.lstm(output_i, dec_hid.unsqueeze(0))
+            output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid.unsqueeze(0), c_i))
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
             dec_outputs.append(output_i)
 
@@ -217,7 +216,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #model = Seq2Seq(alphabet_size=len(alphabet))
     encoder = Encoder()
-    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529)
+    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529, device)
     encoder = encoder.to(device)
     decoder = decoder.to(device)
     #model.apply(weights)
