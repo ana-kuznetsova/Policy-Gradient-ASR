@@ -165,6 +165,7 @@ class AttnDecoderRNN(nn.Module):
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
             output_i = self.attn_combine(output_i).unsqueeze(1)
             output_i = F.relu(output_i)
+            print(output_i.shape, dec_hid.shape)
             output_i, (dec_hid, _) = self.lstm(output_i, dec_hid.unsqueeze(0))
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
             dec_outputs.append(output_i)
