@@ -93,15 +93,21 @@ class Attention(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, alphabet_size):
         super().__init__()
-        self.embed_layer = nn.Linear(alphabet_size, 128)
-        self.lstm_cell = nn.LSTMCell(128, 512)
-        self.output = nn.Linear(1024, alphabet_size)
-        self.attention = Attention()
-        self.dec_h = None 
-        self.dec_c = None
+        self.embed_layer = nn.Embedding(alphabet_size, 128)
+        #self.lstm_cell = nn.LSTMCell(128, 512)
+        #self.output = nn.Linear(1024, alphabet_size)
+        #self.attention = Attention()
+        #self.dec_h = None 
+        #self.dec_c = None
         self.drop_lstm = nn.Dropout(p=0.3)
 
     def forward(self, enc_h, y):
+        '''
+        y is a target sentence
+        '''
+
+
+        '''
         preds = []
         for i, hidden in enumerate(enc_h):
             if i==0:
@@ -117,6 +123,7 @@ class Decoder(nn.Module):
             preds.append(output)
         preds = torch.stack(preds)
         return preds
+        '''
     
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size):
@@ -126,6 +133,7 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, mask, dec_input):
         enc_out, (he, ce) = self.encoder(x, mask)
+        print("enc_out", enc_out)
         preds = self.decoder(enc_out, dec_input)
         return preds
 
@@ -168,8 +176,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
-            print("target", t)
-    '''
+
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
@@ -222,7 +229,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
-        '''
 
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
