@@ -174,17 +174,15 @@ class AttnDecoderRNN(nn.Module):
         return dec_outputs
 
 class Seq2Seq(nn.Module):
-    def __init__(self, alphabet_size):
+    def __init__(self, alphabet_size, batch_size, maxlen):
         super().__init__()
         self.encoder = Encoder()
-        self.decoder = Decoder(alphabet_size)
+        self.decoder = AttnDecoderRNN(512, alphabet_size, batch_size, maxlen)
 
-    def forward(self, x, mask, dec_input):
-        enc_out, (he, ce) = self.encoder(x, mask)
-        enc_out = torch.transpose(enc_out, 0, 1)
-        print(enc_out.shape)
-        preds = self.decoder(enc_out, dec_input)
-        return preds
+    def forward(self, x, t, fmask, device, dec_input=None):
+        enc_out = self.encoder(x, fmask)
+        dec_out = self.decoder(t, enc_out, device=device)
+        return dec_out
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
@@ -201,18 +199,14 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #model = Seq2Seq(alphabet_size=len(alphabet))
-    encoder = Encoder()
-    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529)
-    encoder = encoder.to(device)
-    decoder = decoder.to(device)
-    #model.apply(weights)
+    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
+    model.apply(weights)
 
-    #model = model.to(device)
+    model = model.to(device)
 
-    #criterion = nn.CTCLoss(zero_infinity=True)
-    #optimizer = optim.Adam(model.parameters(), lr=5e-4)
-    #best_model = copy.deepcopy(model.state_dict())
+    criterion = nn.CTCLoss(blank=1, zero_infinity=True)
+    optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    best_model = copy.deepcopy(model.state_dict())
     
 
     init_val_loss = 9999999
@@ -231,12 +225,18 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
-            #print(t)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-            enc_out = encoder(x, fmask)
-            dec_out = decoder(t, enc_out, device=device)
-            print(dec_out.shape)
+            
+            model_out = model(x, t, fmask, device)
+            optimizer.zero_grad()
+            input_length = torch.sum(fmask, dim =1).long().to(device)
+            target_length = torch.sum(tmask, dim=1).long().to(device)
+            loss = criterion(model_out, t, input_length, target_length)
+            print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
+            loss.backward()
+            optimizer.step()
+            epoch_loss+=loss.detach().cpu().numpy()
 
 
             '''
