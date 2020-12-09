@@ -167,6 +167,7 @@ class AttnDecoderRNN(nn.Module):
             output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
             output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid, c_i))
+            print('dec_h', torch.sum(dec_hid))
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
             dec_outputs.append(output_i.squeeze(0))
 
@@ -181,8 +182,8 @@ class Seq2Seq(nn.Module):
 
     def forward(self, x, t, fmask, device, dec_input=None):
         enc_out = self.encoder(x, fmask)
-        print(torch.sum(enc_out))
         dec_out = self.decoder(t, enc_out, device=device)
+        print(torch.sum(dec_out))
         return dec_out
 
 
