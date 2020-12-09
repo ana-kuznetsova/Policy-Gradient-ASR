@@ -144,7 +144,7 @@ class AttnDecoderRNN(nn.Module):
         self.dropout = nn.Dropout(0.3)
         self.lstm = nn.LSTM(input_size=self.hidden_size, 
                             hidden_size=self.hidden_size, 
-                            num_layers=1, batch_first = True,
+                            num_layers=1,
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
@@ -167,6 +167,7 @@ class AttnDecoderRNN(nn.Module):
             output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
             output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid.unsqueeze(0), c_i))
+            print(output_i.shape, dec_hid.shape, c_i.shape)
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
             dec_outputs.append(output_i)
 
