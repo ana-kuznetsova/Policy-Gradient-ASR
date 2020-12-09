@@ -144,7 +144,7 @@ class AttnDecoderRNN(nn.Module):
         self.dropout = nn.Dropout(0.3)
         self.lstm = nn.LSTM(input_size=self.hidden_size, 
                             hidden_size=self.hidden_size, 
-                            num_layers=1,
+                            num_layers=1, batch_first = True,
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
