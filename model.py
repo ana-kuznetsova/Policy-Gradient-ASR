@@ -150,7 +150,7 @@ class AttnDecoderRNN(nn.Module):
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
-            lenghts = torch.ones(input_i)
+            lenghts = torch.ones(input_i.shape)
             input_i = pack_padded_sequence(input_i, lenghts, enforce_sorted=False)
             print(max(input_i), min(input_i))
             embedded = self.embedding(input_i)
