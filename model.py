@@ -232,8 +232,9 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             optimizer.zero_grad()
             input_length = torch.sum(fmask, dim =1).long().to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
-            preds = torch.transpose(torch.argmax(model_out, dim=2), 0, 1)
-            print(preds)
+            #preds = torch.transpose(torch.argmax(model_out, dim=2), 0, 1)
+            print(model_out.shape)
+
             loss = criterion(model_out, t, input_length, target_length)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
