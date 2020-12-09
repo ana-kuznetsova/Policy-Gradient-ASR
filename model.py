@@ -231,7 +231,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = model(x, t, fmask, device)
             optimizer.zero_grad()
             #input_length = torch.sum(fmask, dim =1).long().to(device)
-            input_length = (torch.ones(batch_size)*maxlent).to(device)
+            input_length = (torch.ones(batch_size)*maxlent).to(device).long()
             target_length = torch.sum(tmask, dim=1).long().to(device)
             #preds = torch.transpose(torch.argmax(model_out, dim=2), 0, 1)
 
