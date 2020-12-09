@@ -204,7 +204,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     model = model.to(device)
 
-    criterion = nn.CTCLoss(blank=1, zero_infinity=True)
+    criterion = nn.CTCLoss(blank=2, zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
     
@@ -232,6 +232,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             optimizer.zero_grad()
             input_length = torch.sum(fmask, dim =1).long().to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
+            print(model_out.shape, t.shape)
             loss = criterion(model_out, t, input_length, target_length)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
