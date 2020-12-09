@@ -151,6 +151,7 @@ class AttnDecoderRNN(nn.Module):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             print(max(input_i), min(input_i))
+            break
             embedded = self.embedding(input_i).unsqueeze(0)
             embedded = self.dropout(embedded)
             print(embedded.shape)
