@@ -150,6 +150,7 @@ class AttnDecoderRNN(nn.Module):
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input = target_inputs[:,col]
+            print(max(input), min(input))
             embedded = self.embedding(input).unsqueeze(0)
             embedded = self.dropout(embedded)
             print(embedded.shape)
