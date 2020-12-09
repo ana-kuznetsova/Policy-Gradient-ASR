@@ -216,7 +216,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #model = Seq2Seq(alphabet_size=len(alphabet))
     encoder = Encoder()
-    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529, device)
+    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529)
     encoder = encoder.to(device)
     decoder = decoder.to(device)
     #model.apply(weights)
@@ -248,7 +248,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
-            dec_out = decoder(t, enc_out)
+            dec_out = decoder(t, enc_out, device=device)
 
 
             '''
