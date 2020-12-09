@@ -77,7 +77,7 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
-        return output, (hn, cn)
+        return output
     
 class Attention(nn.Module):
     def __init__(self):
@@ -165,28 +165,6 @@ class AttnDecoderRNN(nn.Module):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
 
-
-class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, batch_size):
-        super(DecoderRNN, self).__init__()
-        self.hidden_size = hidden_size
-        self.batch_size = batch_size
-
-        self.embedding = nn.Embedding(output_size, hidden_size)
-        self.lstm = nn.LSTM(input_size=512, 
-                                hidden_size=512, 
-                                num_layers=1,
-                                dropout=0.3)
-        self.out = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
-
-    def forward(self, input, hidden):
-        output = self.embedding(input).view(1, 1, -1)
-        output = nn.functional.relu(output)
-        output, hidden = self.gru(output, hidden)
-        output = self.softmax(self.out(output[0]))
-        return output, hidden
-
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size):
         super().__init__()
@@ -213,14 +191,16 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(alphabet))
-    model.apply(weights)
+    #model = Seq2Seq(alphabet_size=len(alphabet))
+    encoder = Encoder()
+    decoder = AttnDecoderRNN(512, len(alphabet), 211)
+    #model.apply(weights)
 
-    model = model.to(device)
+    #model = model.to(device)
 
-    criterion = nn.CTCLoss(zero_infinity=True)
-    optimizer = optim.Adam(model.parameters(), lr=5e-4)
-    best_model = copy.deepcopy(model.state_dict())
+    #criterion = nn.CTCLoss(zero_infinity=True)
+    #optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    #best_model = copy.deepcopy(model.state_dict())
     
 
     init_val_loss = 9999999
@@ -239,10 +219,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
-            print('t:', t)
-
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
+            enc_out = encoder(x)
+            print(enc_out.shape)
+
+            '''
             dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
             #print("before model:", x.shape, t.shape)
             preds = model(x, fmask, dec_input)
@@ -293,7 +275,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
-
+'''
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
     with open(alphabet_path, 'r') as fo:
