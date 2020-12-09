@@ -152,19 +152,21 @@ class AttnDecoderRNN(nn.Module):
         if not dec_hid:
             dec_hid = encoder_outputs[-1]
             print('dec_h', dec_hid.shape)
-
+        encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
+        print(encoder_outputs.shape)
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             embedded = self.embedding(input_i)
             embedded = self.dropout(embedded)
             combined_input_i = torch.cat((embedded, dec_hid), 1)
             attn_weights_i = F.softmax(self.attn(combined_input_i))
-            print(attn_weights_i.shape)
+            attn_applied_i = torch.bmm(attn_weights_i.unsqueeze(1),
+                                    encoder_outputs)
+            print(attn_applied_i.shape)
             
 
         '''
-        attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+   
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
                                  encoder_outputs.unsqueeze(0))
 
