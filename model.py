@@ -212,7 +212,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #model = Seq2Seq(alphabet_size=len(alphabet))
     encoder = Encoder()
-    decoder = AttnDecoderRNN(512, 2529, batch_size, 211)
+    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 2529)
     encoder = encoder.to(device)
     decoder = decoder.to(device)
     #model.apply(weights)
