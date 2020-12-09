@@ -137,7 +137,7 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
         self.batch_size = batch_size
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
+        self.embedding = nn.Embedding(self.output_size, self.hidden_size, padding_idx=-1)
         self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
         self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         self.dropout = nn.Dropout(0.3)
