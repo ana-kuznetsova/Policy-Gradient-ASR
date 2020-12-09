@@ -148,9 +148,9 @@ class AttnDecoderRNN(nn.Module):
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
-        print(encoder_outputs.shape)
+        print(encoder_outputs)
         if not dec_hid:
-            dec_hid = encoder_outputs[:, -1, :]
+            dec_hid = encoder_outputs[-1]
             print('dec_h', dec_hid.shape)
 
         for col in range(target_inputs.shape[1]):
