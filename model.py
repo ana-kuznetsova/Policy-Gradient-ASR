@@ -137,7 +137,7 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
         self.batch_size = batch_size
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size, padding_idx=-1)
+        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
         self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
         self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         self.dropout = nn.Dropout(0.3)
@@ -150,10 +150,9 @@ class AttnDecoderRNN(nn.Module):
     def forward(self, target_inputs, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
-            #print(max(input_i), min(input_i))
-            #embedded = self.embedding(input_i)
+            embedded = self.embedding(input_i)
             #embedded = self.dropout(embedded)
-           # print(embedded.shape)
+            print(embedded.shape)
 
         '''
         attn_weights = F.softmax(
