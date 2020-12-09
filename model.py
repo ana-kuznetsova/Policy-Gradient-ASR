@@ -163,7 +163,7 @@ class AttnDecoderRNN(nn.Module):
             attn_applied_i = torch.bmm(attn_weights_i.unsqueeze(1),
                                     encoder_outputs)
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
-            output_i = self.attn_combine(output_i).unsqueeze(1)
+            output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
             print(output_i.shape, dec_hid.shape)
             output_i, (dec_hid, _) = self.lstm(output_i, dec_hid.unsqueeze(0))
