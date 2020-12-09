@@ -198,6 +198,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         alphabet = fo.readlines() 
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
+    print(len(alphabet))
+    print(char2ind)
     ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
