@@ -130,11 +130,12 @@ class Decoder(nn.Module):
     
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, max_length):
+    def __init__(self, hidden_size, output_size, batch_size, max_length):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.max_length = max_length
+        self.batch_size = batch_size
 
         self.embedding = nn.Embedding(self.output_size, self.hidden_size)
         self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
@@ -146,10 +147,12 @@ class AttnDecoderRNN(nn.Module):
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, hidden, encoder_outputs):
-        embedded = self.embedding(input).view(1, 1, -1)
-        embedded = self.dropout(embedded)
-        print(embedded.shape)
+    def forward(self, target_inputs, encoder_outputs, dec_hid=None):
+        for col in range(target_inputs.shape[1]):
+            input = target_inputs[:,col]
+            embedded = self.embedding(input).unsqueeze(0)
+            embedded = self.dropout(embedded)
+            print(embedded.shape)
 
         '''
         attn_weights = F.softmax(
@@ -199,7 +202,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #model = Seq2Seq(alphabet_size=len(alphabet))
     encoder = Encoder()
-    decoder = AttnDecoderRNN(512, len(alphabet), 211)
+    decoder = AttnDecoderRNN(512, len(alphabet), batch_size, 211)
     encoder = encoder.to(device)
     decoder = decoder.to(device)
     #model.apply(weights)
@@ -231,6 +234,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
+            dec_out = decoder(t, enc_out)
 
 
             '''
