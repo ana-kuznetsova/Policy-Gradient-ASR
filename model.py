@@ -137,7 +137,7 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
         self.batch_size = batch_size
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size, padding_idx=-1)
+        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
         self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
         self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         self.dropout = nn.Dropout(0.3)
@@ -147,9 +147,10 @@ class AttnDecoderRNN(nn.Module):
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, target_inputs, encoder_outputs, dec_hid=None):
+    def forward(self, target_inputs, tmasks, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
+            input_i = pack_padded_sequence(input_i, 1, enforce_sorted=False)
             print(max(input_i), min(input_i))
             embedded = self.embedding(input_i)
             #embedded = self.dropout(embedded)
