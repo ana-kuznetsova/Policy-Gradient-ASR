@@ -230,11 +230,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             
             model_out = model(x, t, fmask, device)
             optimizer.zero_grad()
-            input_length = torch.sum(fmask, dim =1).long().to(device)
+            #input_length = torch.sum(fmask, dim =1).long().to(device)
+            input_length = (torch.ones(batch_size)*maxlent).to(device)
             target_length = torch.sum(tmask, dim=1).long().to(device)
             #preds = torch.transpose(torch.argmax(model_out, dim=2), 0, 1)
 
-            loss = criterion(model_out, t, target_length, target_length)
+            loss = criterion(model_out, t, input_length, target_length)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
