@@ -194,6 +194,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     #model = Seq2Seq(alphabet_size=len(alphabet))
     encoder = Encoder()
     decoder = AttnDecoderRNN(512, len(alphabet), 211)
+    encoder = encoder.to(device)
+    decoder = decoder.to(device)
     #model.apply(weights)
 
     #model = model.to(device)
