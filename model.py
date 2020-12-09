@@ -158,8 +158,8 @@ class AttnDecoderRNN(nn.Module):
             embedded = self.embedding(input_i)
             embedded = self.dropout(embedded)
             combined_input_i = torch.cat((embedded, dec_hid), 1)
-            attn_i = F.softmax(self.attn(combined_input_i))
-            print(attn_i)
+            attn_weights_i = F.softmax(self.attn(combined_input_i))
+            print(attn_weights_i.shape)
             
 
         '''
