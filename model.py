@@ -9,6 +9,7 @@ import torch.utils.data as data
 import torchaudio
 from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import torch.nn.functional as F
 
 from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder, collapse_fn
@@ -157,7 +158,9 @@ class AttnDecoderRNN(nn.Module):
             embedded = self.embedding(input_i)
             embedded = self.dropout(embedded)
             combined_input_i = torch.cat((embedded, dec_hid), 1)
-            print(combined_input_i.shape)
+            attn_i = F.softmax(self.attn(combined_input_i))
+            print(attn_i)
+            
 
         '''
         attn_weights = F.softmax(
