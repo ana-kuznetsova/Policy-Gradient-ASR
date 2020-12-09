@@ -238,7 +238,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
-            dec_out = decoder(t, enc_out)
+            dec_out = decoder(t, tmask, enc_out)
 
 
             '''
