@@ -166,27 +166,12 @@ class AttnDecoderRNN(nn.Module):
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
             output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
-            print(dec_hid.shape, c_i.shape)
             output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid, c_i))
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
-            print(output_i.shape)
             dec_outputs.append(output_i)
 
         dec_outputs =  torch.stack(dec_outputs)
-        print(dec_outputs.shape)
-
-        '''
-
-        
-
-
-        
-        return output, hidden, attn_weights
-        '''
-
-    def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
-
+        return dec_outputs
 
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size):
@@ -251,6 +236,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
             dec_out = decoder(t, enc_out, device=device)
+            print(dec_out.shape)
 
 
             '''
