@@ -153,7 +153,7 @@ class AttnDecoderRNN(nn.Module):
             dec_hid = encoder_outputs[-1].unsqueeze(0)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
-        c_i = torch.zeros(dec_hid.shape).to(device).unsqueeze(0)
+        c_i = torch.zeros(dec_hid.shape).to(device)
         dec_outputs = []
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
