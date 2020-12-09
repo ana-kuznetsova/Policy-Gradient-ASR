@@ -150,25 +150,25 @@ class AttnDecoderRNN(nn.Module):
 
     def forward(self, target_inputs, encoder_outputs, dec_hid=None, device=None):
         if not dec_hid:
-            dec_hid = encoder_outputs[-1]
+            dec_hid = encoder_outputs[-1].unsqueeze(0)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
-        c_i = torch.zeros(dec_hid.shape).to(device)
+        c_i = torch.zeros(dec_hid.shape).to(device).unsqueeze(0)
         dec_outputs = []
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
             embedded = self.embedding(input_i)
             embedded = self.dropout(embedded)
-            combined_input_i = torch.cat((embedded, dec_hid), 1)
+            combined_input_i = torch.cat((embedded, dec_hid.squeeze(0)), 1)
             attn_weights_i = F.softmax(self.attn(combined_input_i))
             attn_applied_i = torch.bmm(attn_weights_i.unsqueeze(1),
                                     encoder_outputs)
             output_i = torch.cat((embedded, attn_applied_i.squeeze(1)), 1)
             output_i = self.attn_combine(output_i).unsqueeze(0)
             output_i = F.relu(output_i)
-            print(output_i.shape, dec_hid.shape, c_i.shape)
-            output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid.unsqueeze(0), c_i.unsqueeze(0)))
+            output_i, (dec_hid, c_i) = self.lstm(output_i, (dec_hid, c_i))
             output_i = F.log_softmax(self.out(output_i.squeeze(1)), dim=1)
+            print(output_i.shape)
             dec_outputs.append(output_i)
 
         dec_outputs =  torch.stack(dec_outputs)
