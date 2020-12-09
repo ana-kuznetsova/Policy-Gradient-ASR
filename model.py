@@ -147,10 +147,11 @@ class AttnDecoderRNN(nn.Module):
                             dropout=0.3)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, target_inputs, tmasks, encoder_outputs, dec_hid=None):
+    def forward(self, target_inputs, encoder_outputs, dec_hid=None):
         for col in range(target_inputs.shape[1]):
             input_i = target_inputs[:,col]
-            input_i = pack_padded_sequence(input_i, 1, enforce_sorted=False)
+            lenghts = torch.ones(input_i)
+            input_i = pack_padded_sequence(input_i, lenghts, enforce_sorted=False)
             print(max(input_i), min(input_i))
             embedded = self.embedding(input_i)
             #embedded = self.dropout(embedded)
@@ -238,7 +239,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             enc_out = encoder(x, fmask)
-            dec_out = decoder(t, tmask, enc_out)
+            dec_out = decoder(t, enc_out)
 
 
             '''
