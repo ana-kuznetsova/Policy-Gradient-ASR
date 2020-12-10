@@ -128,14 +128,14 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
     
             model_out = model(x, fmask)
-            input_lengths = torch.sum(fmask, dim=1)
-            target_lengths = torch.sum(tmask, dim=1)
+            input_lengths = torch.sum(fmask, dim=1).long()
+            target_lengths = torch.sum(tmask, dim=1).long()
     
             optimizer.zero_grad()
     
             loss = criterion(model_out, t, input_lengths, target_lengths)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
-            
+
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
