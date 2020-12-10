@@ -100,7 +100,7 @@ class Attention(nn.Module):
         print(align.shape, c_t.shape)
         for i, enc_hid in enumerate(enc_hid_states):
             print(align[:, i].shape, enc_hid.shape)
-            c_t+= align[:, i]*enc_hid
+            c_t+= align[:, i].unsqueeze(0)*enc_hid
         return c_t
         
     
