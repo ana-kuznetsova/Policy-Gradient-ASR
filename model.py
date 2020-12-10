@@ -97,9 +97,9 @@ class Attention(nn.Module):
         
         align = F.softmax(scores, dim=1)
         c_t = torch.zeros(dec_hid.shape).to(device)
-        print(align.unsqueeze(0).shape, c_t.shape)
+        print(align).shape, c_t.shape)
         for i, enc_hid in enumerate(enc_hid_states):
-            print(align[:, i].shape, enc_hid.shape)
+            print(align[:, i].unsqueeze(0).shape, enc_hid.shape)
             c_t+= align[:, i].unsqueeze(0)*enc_hid
         return c_t
         
