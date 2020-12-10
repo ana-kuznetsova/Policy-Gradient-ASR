@@ -91,9 +91,13 @@ class Attention(nn.Module):
         enc_hid_states = torch.transpose(enc_hid_states, 0, 1)
         scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
         for i, enc_hid in enumerate(enc_hid_states):
+            score_i = torch.bmm(dec_hid.unsqueeze(1), enc_hid.unsqueeze(2))[:,0,0]
+            scores[:, i] = scores_i
+            '''
             for row in range(enc_hid.shape[0]):
                 score_i = torch.matmul(dec_hid[row, :], enc_hid[row, :].T)
                 scores[row, i] = score_i
+            '''
         
         align = F.softmax(scores, dim=1)
         c_t = torch.zeros(dec_hid.shape).to(device)
