@@ -128,22 +128,14 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             
             model_out = model(x, fmask)
-            model_out = torch.transpose(model_out, 0, 1)
-            model_out = model_out.detach().cpu().numpy()
-            fmask = fmask.detach().cpu().numpy()
+            #model_out = torch.transpose(model_out, 0, 1)
+            #model_out = model_out.detach().cpu().numpy()
+            #fmask = fmask.detach().cpu().numpy()
 
-            preds = []
-            for i, probs in enumerate(model_out):
-                pad_ind = int(np.sum(fmask[i]))
-                probs = np.exp(probs[:pad_ind,])
-                seq , _ = ctc_decoder.decode(probs, beam_size=5, blank=2)
-                seq = collapse_fn_int(seq)
-                seq = pad(seq, maxlent)
-                preds.append(seq)
-            preds = torch.tensor(preds).to(device)
+        
             optimizer.zero_grad()
     
-            loss = criterion(preds, t)
+            loss = criterion(model_out, t)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
