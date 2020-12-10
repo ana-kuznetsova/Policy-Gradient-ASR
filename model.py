@@ -102,7 +102,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     model = Encoder(256, len(alphabet))
     model = model.to(device)
 
-    criterion = customNLLLoss(ignore_index=0)
+    criterion = torch.nn.CTCLoss(blank=2, zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
     ctc_decoder = CTCDecoder(alphabet)
@@ -126,16 +126,16 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-            
+    
             model_out = model(x, fmask)
-            #model_out = torch.transpose(model_out, 0, 1)
-            #model_out = model_out.detach().cpu().numpy()
-            #fmask = fmask.detach().cpu().numpy()
+            input_lengths = torch.sum(fmask, dim=1)
+            print('leng', input_lengths)
+            
 
-        
+            
             optimizer.zero_grad()
     
-            loss = criterion(model_out, t)
+            loss = criterion(preds, t)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
