@@ -77,11 +77,12 @@ class Encoder(nn.Module):
             out = self.drop(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
-        print("outputs", outputs.shape)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
+        output = self.output_layer(output)
+        print("out", output.shape)
         return output
 
 
