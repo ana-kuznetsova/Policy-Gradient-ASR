@@ -110,18 +110,16 @@ class Decoder(nn.Module):
                             hidden_size=hidden_size, 
                             num_layers=1,
                             dropout=0.3)
-        self.output = nn.Linear(1024, output_size)
+        self.output = nn.Linear(2* hidden_size, output_size)
         self.attention = Attention()
-        self.dec_h = None 
-        self.dec_c = None
         self.drop_lstm = nn.Dropout(p=0.3)
 
-    def forward(self, target_inputs, encoder_outputs, dec_hid=None, device=None):
+    def forward(self, target_inputs, encoder_outputs, device=None):
         '''
         y is a target sentence
         '''
-        if not dec_hid:
-            dec_hid = encoder_outputs[-1].unsqueeze(0)
+      
+        dec_hid = encoder_outputs[-1].unsqueeze(0)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
         c_i = torch.zeros(dec_hid.shape).to(device)
@@ -206,9 +204,9 @@ class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size, batch_size, maxlen):
         super().__init__()
         self.encoder = Encoder()
-        self.decoder = AttnDecoderRNN(512, alphabet_size, batch_size, maxlen)
+        self.decoder = Decoder(alphabet_size, 512)
 
-    def forward(self, x, t, fmask, device, dec_input=None):
+    def forward(self, x, t, fmask, device,):
         enc_out = self.encoder(x, fmask)
         dec_out = self.decoder(t, enc_out, device=device)
         print(dec_out.shape)
