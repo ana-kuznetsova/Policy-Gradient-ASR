@@ -91,7 +91,9 @@ class Attention(nn.Module):
         scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
         for i, enc_hid in enumerate(enc_hid_states):
             for row in range(enc_hid.shape[0]):
+                print(i, scores.shape)
                 score_i = torch.matmul(dec_hid[row, :], enc_hid[row, :].T)
+                print(score_i)
                 scores[row, i] = score_i
         
         align = F.softmax(scores, dim=1)
