@@ -97,7 +97,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Encoder(512, len(alphabet))
+    model = Encoder(256, len(alphabet))
     model = model.to(device)
 
     criterion = customNLLLoss(ignore_index=0)
