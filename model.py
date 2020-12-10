@@ -135,9 +135,9 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
                 pad_ind = int(np.sum(fmask[i]))
                 probs = np.exp(probs[:pad_ind,])
                 seq , score = ctc_decoder.decode(probs, beam_size=5)
-                seq = ''.join([ind2char[ind] for ind in seq])
+                #seq = ''.join([ind2char[ind] for ind in seq])
                 seq = collapse_fn(seq)
-                print(len(seq), score)
+                print(seq, score)
 
             optimizer.zero_grad()
     
