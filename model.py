@@ -93,6 +93,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
+    alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
@@ -104,6 +105,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     criterion = customNLLLoss(ignore_index=0)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
+    ctc_decoder = CTCDecoder(alphabet)
     
 
     init_val_loss = 9999999
@@ -126,7 +128,15 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             
             model_out = model(x, fmask)
-            print(t.shape)
+            model_out = torch.transpose(model_out, 0, 1)
+            model_out = model_out.detach().cpu().numpy()
+            fmask = fmask.detach().cpu().numpy()
+            for i, probs in enumerate(model_out):
+                pad_ind = int(np.sum(fmask[i]))
+                probs = np.exp(probs[:pad_ind,])
+                seq , score = ctc_decoder.decode(probs, beam_size=5)
+                print(seq, score)
+
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
