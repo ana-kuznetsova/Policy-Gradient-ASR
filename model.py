@@ -155,10 +155,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-            
-            model_out = model(x, t, fmask, device)
     
-            loss = criterion(model_out, t)
+            model_out = model(x, fmask)
+            input_lengths = torch.sum(fmask, dim=1).long()
+            target_lengths = torch.sum(tmask, dim=1).long()
 
             val_loss+=loss.detach().cpu().numpy()
 
