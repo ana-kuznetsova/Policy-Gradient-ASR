@@ -83,7 +83,7 @@ class Encoder(nn.Module):
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         output = self.output_layer(output)
         output = self.log_softmax(output)
-        print(output)
+        print(output.shape)
         return output
 
 
