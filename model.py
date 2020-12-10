@@ -134,6 +134,7 @@ class Decoder(nn.Module):
             output_i = self.output(combined_input)
             output_i = F.log_softmax(output_i, dim=1)
             dec_outputs.append(output_i)
+            print(output_i.sum())
 
         dec_outputs = torch.stack(dec_outputs)
         return dec_outputs
@@ -155,7 +156,7 @@ class Decoder(nn.Module):
             preds.append(output)
         preds = torch.stack(preds)
         return preds
-    '''
+
     
 
 class AttnDecoderRNN(nn.Module):
@@ -200,6 +201,7 @@ class AttnDecoderRNN(nn.Module):
             print(output_i.sum())
         dec_outputs = torch.stack(dec_outputs)
         return dec_outputs
+        '''
 
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size, batch_size, maxlen):
