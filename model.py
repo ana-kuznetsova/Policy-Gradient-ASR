@@ -235,7 +235,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     model = model.to(device)
 
-    criterion = nn.CTCLoss(blank=2, zero_infinity=False)
+    criterion = nn.CTCLoss(blank=2, zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
     
