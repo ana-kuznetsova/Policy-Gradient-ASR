@@ -133,6 +133,7 @@ class Decoder(nn.Module):
             combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
             output_i = self.output(combined_input)
             output_i = F.log_softmax(output_i, dim=1)
+            print(torch.sum(output_i))
             dec_outputs.append(output_i)
 
         dec_outputs = torch.stack(dec_outputs)
