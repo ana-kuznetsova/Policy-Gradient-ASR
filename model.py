@@ -56,15 +56,17 @@ def nan_to_num(t,mynan=0.):
     return torch.cat([nan_to_num(l).unsqueeze(0) for l in t],0)
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self, hidden_size, output_size):
         super().__init__()
-        self.input_layer = nn.Linear(120, 512)
-        self.blstm = nn.LSTM(input_size=512, 
-                             hidden_size=256, 
-                             num_layers=2,
+        self.input_layer = nn.Linear(120, 2 * hidden_size)
+        self.blstm = nn.LSTM(input_size= 2 * hidden_size, 
+                             hidden_size=hidden_size, 
+                             num_layers=3,
                              dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
+        self.output_layer = nn.Linear(2*hidden_size, output_size)
+        self.log_softmax = F.LogSoftmax(dim=1)
         
     def forward(self, x, mask):
         outputs=[]
@@ -75,6 +77,7 @@ class Encoder(nn.Module):
             out = self.drop(out)
             outputs.append(out)
         outputs = torch.stack(outputs)
+        print("outputs", outputs.shape)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
