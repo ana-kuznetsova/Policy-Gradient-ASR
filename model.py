@@ -130,14 +130,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = model(x, fmask)
             input_lengths = torch.sum(fmask, dim=1)
             target_lengths = torch.sum(tmask, dim=1)
-            print(target_lengths)
-            
-
-            
+    
             optimizer.zero_grad()
     
-            loss = criterion(preds, t)
+            loss = criterion(model_out, t, input_lengths, target_lengths)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
+            
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
