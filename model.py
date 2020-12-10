@@ -80,72 +80,6 @@ class Encoder(nn.Module):
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output
-    
-class Attention(nn.Module):
-    def __init__(self):
-        super().__init__()
-        
-    def forward(self, enc_hid_states, dec_hid, device):
-        enc_hid_states = torch.transpose(enc_hid_states, 0, 1)
-        scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
-        for i, enc_hid in enumerate(enc_hid_states):
-            score_i = torch.bmm(dec_hid.unsqueeze(1), enc_hid.unsqueeze(2))[:,0,0]
-            scores[:, i] = score_i
-        
-        align = F.softmax(scores, dim=1)
-        c_t = torch.zeros(dec_hid.shape).to(device)
-        for i, enc_hid in enumerate(enc_hid_states):
-            c_t+= align[:, i].unsqueeze(1)*enc_hid
-        return c_t
-        
-    
-class Decoder(nn.Module):
-    def __init__(self, output_size, hidden_size):
-        super().__init__()
-        self.embed_layer = nn.Embedding(output_size, 128)
-        #self.lstm_cell = nn.LSTMCell(128, hidden_size)
-        self.lstm = nn.LSTM(input_size=128, 
-                            hidden_size=hidden_size, 
-                            num_layers=1,
-                            dropout=0.3)
-        self.output = nn.Linear(2* hidden_size, output_size)
-        self.attention = Attention()
-        self.drop_lstm = nn.Dropout(p=0.3)
-
-    def forward(self, target_inputs, encoder_outputs, device=None):
-        '''
-        y is a target sentence
-        '''
-      
-        dec_hid = encoder_outputs[-1].unsqueeze(0)
-
-        encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
-        c_i = torch.zeros(dec_hid.shape).to(device)
-        dec_outputs = []
-
-        for inp in torch.transpose(target_inputs, 0, 1):
-            embedded = self.embed_layer(inp)
-            dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
-            context = self.attention(encoder_outputs, dec_out.squeeze(0), device)
-            combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
-            output_i = self.output(combined_input)
-            output_i = F.log_softmax(output_i, dim=1)
-            dec_outputs.append(output_i)
-
-        dec_outputs = torch.stack(dec_outputs)
-        return dec_outputs
-
-
-class Seq2Seq(nn.Module):
-    def __init__(self, alphabet_size, batch_size, maxlen):
-        super().__init__()
-        self.encoder = Encoder()
-        self.decoder = Decoder(alphabet_size, 512)
-
-    def forward(self, x, t, fmask, device,):
-        enc_out = self.encoder(x, fmask)
-        dec_out = self.decoder(t, enc_out, device=device)
-        return dec_out
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
@@ -160,9 +94,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
-    model.apply(weights)
-
+    model = Encoder()
     model = model.to(device)
 
     criterion = customNLLLoss(ignore_index=0)
@@ -189,7 +121,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
             
-            model_out = model(x, t, fmask, device)
+            model_out = model(x, fmask)
+            print(model_out.shape)
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
