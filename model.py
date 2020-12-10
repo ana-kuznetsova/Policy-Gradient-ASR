@@ -130,7 +130,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = model(x, fmask)
             input_lengths = torch.sum(fmask, dim=1)
             target_lengths = torch.sum(tmask, dim=1)
-            print(target_lengths)
+            print(tmask)
             
 
             
