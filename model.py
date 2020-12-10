@@ -87,28 +87,57 @@ class Attention(nn.Module):
     def __init__(self):
         super().__init__()
         
-    def forward(self, h_e, h_d):
-        score = torch.matmul(h_e.T, h_d)
-        a_t = nn.functional.softmax(score, dim=0)
-        c_t = torch.sum(a_t, dim=0)*h_e 
+    def forward(self, enc_hid_states, dec_hid, device):
+        scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
+        for i, enc_hid in enumerate(enc_hid_states):
+            for row in range(enc_hid.shape[0]):
+                score_i = torch.matmul(dec_hid[row, :], enc_hid[row, :].T)
+                scores[row, i] = score_i
+        
+        align = F.softmax(scores, dim=1)
+        c_t = torch.zeros(dec_hid.shape).to(device)
+        for i, enc_hid in enumerate(enc_hid_states):
+            c_t+= align[:, i]*enc_hid
         return c_t
         
     
 class Decoder(nn.Module):
-    def __init__(self, alphabet_size):
+    def __init__(self, output_size, hidden_size):
         super().__init__()
-        self.embed_layer = nn.Embedding(alphabet_size, 128)
-        #self.lstm_cell = nn.LSTMCell(128, 512)
-        #self.output = nn.Linear(1024, alphabet_size)
-        #self.attention = Attention()
-        #self.dec_h = None 
-        #self.dec_c = None
+        self.embed_layer = nn.Embedding(output_size, 128)
+        #self.lstm_cell = nn.LSTMCell(128, hidden_size)
+        self.lstm = nn.LSTM(input_size=128, 
+                            hidden_size=hidden_size, 
+                            num_layers=1,
+                            dropout=0.3)
+        self.output = nn.Linear(1024, output_size)
+        self.attention = Attention()
+        self.dec_h = None 
+        self.dec_c = None
         self.drop_lstm = nn.Dropout(p=0.3)
 
-    def forward(self, enc_h, y):
+    def forward(self, target_inputs, encoder_outputs, dec_hid=None, device=None):
         '''
         y is a target sentence
         '''
+        if not dec_hid:
+            dec_hid = encoder_outputs[-1].unsqueeze(0)
+
+        encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
+        c_i = torch.zeros(dec_hid.shape).to(device)
+        dec_outputs = []
+
+        for inp in torch.transpose(target_inputs, 0, 1):
+            embedded = self.embed_layer(inp)
+            dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
+            context = self.attention(encoder_outputs, dec_out.squeeze(0), device)
+            combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
+            output_i = self.output(combined_input)
+            output_i = F.log_softmax(output_i, dim=1)
+            dec_outputs.append(output_i)
+
+        dec_outputs = torch.stack(dec_outputs)
+        return dec_outputs
 
 
         '''
@@ -127,7 +156,7 @@ class Decoder(nn.Module):
             preds.append(output)
         preds = torch.stack(preds)
         return preds
-        '''
+    '''
     
 
 class AttnDecoderRNN(nn.Module):
@@ -183,7 +212,7 @@ class Seq2Seq(nn.Module):
     def forward(self, x, t, fmask, device, dec_input=None):
         enc_out = self.encoder(x, fmask)
         dec_out = self.decoder(t, enc_out, device=device)
-        print(torch.sum(dec_out))
+        print(dec_out.shape)
         return dec_out
 
 
