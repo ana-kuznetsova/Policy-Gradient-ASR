@@ -98,7 +98,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
     model = Encoder(256, len(alphabet))
     model = model.to(device)
 
