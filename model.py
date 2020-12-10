@@ -61,7 +61,7 @@ class Encoder(nn.Module):
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
-                             num_layers=1,
+                             num_layers=2,
                              dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
@@ -135,24 +135,6 @@ class Decoder(nn.Module):
         dec_outputs = torch.stack(dec_outputs)
         return dec_outputs
 
-
-        '''
-        preds = []
-        for i, hidden in enumerate(enc_h):
-            if i==0:
-                self.dec_h, self.dec_c = self.lstm_cell(y)
-            else:
-                self.dec_h, self.dec_c = self.lstm_cell(y, (self.dec_h, self.dec_c))
-            self.dec_h = self.drop_lstm(self.dec_h)
-            c_t = self.attention(hidden, self.dec_h)
-            combined_input = torch.cat([self.dec_h, c_t], 1)
-            y_hat = self.output(combined_input)
-            output = nn.functional.log_softmax(y_hat, dim=1)
-            y = self.embed_layer(y_hat)
-            preds.append(output)
-        preds = torch.stack(preds)
-        return preds
-        '''
 
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size, batch_size, maxlen):
