@@ -88,7 +88,8 @@ class Attention(nn.Module):
         super().__init__()
         
     def forward(self, enc_hid_states, dec_hid, device):
-        scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[1]).to(device)
+        enc_hid_states = torch.transpose(enc_hid_states, 0, 1)
+        scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
         for i, enc_hid in enumerate(enc_hid_states):
             for row in range(enc_hid.shape[0]):
                 print(i, scores.shape)
