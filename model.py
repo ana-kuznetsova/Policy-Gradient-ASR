@@ -139,8 +139,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
                 seq , score = ctc_decoder.decode(probs, beam_size=5)
                 seq = collapse_fn_int(seq)
                 seq = pad(seq, maxlent)
-                print(seq.shape)
                 preds.append(seq)
+            print(np.array(preds).shape)
                 
 
             optimizer.zero_grad()
