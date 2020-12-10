@@ -83,7 +83,6 @@ class Encoder(nn.Module):
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         output = self.output_layer(output)
         output = self.log_softmax(output)
-        print(output.shape)
         return output
 
 
@@ -127,7 +126,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             
             model_out = model(x, fmask)
-            print(model_out.shape)
+            print(t.shape)
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
