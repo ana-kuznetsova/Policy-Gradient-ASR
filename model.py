@@ -66,7 +66,7 @@ class Encoder(nn.Module):
                              bidirectional=True)
         self.drop = nn.Dropout()
         self.output_layer = nn.Linear(2*hidden_size, output_size)
-        self.log_softmax = F.LogSoftmax(dim=1)
+        self.log_softmax = torch.nn.LogSoftmax(dim=1)
         
     def forward(self, x, mask):
         outputs=[]
