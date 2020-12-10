@@ -136,11 +136,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             for i, probs in enumerate(model_out):
                 pad_ind = int(np.sum(fmask[i]))
                 probs = np.exp(probs[:pad_ind,])
-                seq , score = ctc_decoder.decode(probs, beam_size=5)
+                seq , _ = ctc_decoder.decode(probs, beam_size=5)
                 seq = collapse_fn_int(seq)
                 seq = pad(seq, maxlent)
                 preds.append(seq)
-            print(np.array(preds).shape)
+            preds = torch.tensor(preds).to(device)
+            print(preds.shape)
                 
 
             optimizer.zero_grad()
