@@ -11,6 +11,7 @@ from torchsummary import summary
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 
+from loss import customNLLLoss
 from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
@@ -93,11 +94,6 @@ class Attention(nn.Module):
         for i, enc_hid in enumerate(enc_hid_states):
             score_i = torch.bmm(dec_hid.unsqueeze(1), enc_hid.unsqueeze(2))[:,0,0]
             scores[:, i] = score_i
-            '''
-            for row in range(enc_hid.shape[0]):
-                score_i = torch.matmul(dec_hid[row, :], enc_hid[row, :].T)
-                scores[row, i] = score_i
-            '''
         
         align = F.softmax(scores, dim=1)
         c_t = torch.zeros(dec_hid.shape).to(device)
@@ -137,7 +133,6 @@ class Decoder(nn.Module):
             combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
             output_i = self.output(combined_input)
             output_i = F.log_softmax(output_i, dim=1)
-            print(torch.sum(output_i))
             dec_outputs.append(output_i)
 
         dec_outputs = torch.stack(dec_outputs)
@@ -215,7 +210,6 @@ class Seq2Seq(nn.Module):
     def forward(self, x, t, fmask, device,):
         enc_out = self.encoder(x, fmask)
         dec_out = self.decoder(t, enc_out, device=device)
-        print(dec_out.shape)
         return dec_out
 
 
@@ -238,7 +232,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     model = model.to(device)
 
-    criterion = nn.CTCLoss(blank=2, zero_infinity=True)
+    criterion = customNLLLoss(ignore_index=0)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
     
@@ -265,8 +259,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = model(x, t, fmask, device)
             optimizer.zero_grad()
             #input_length = torch.sum(fmask, dim =1).long().to(device)
-            input_length = (torch.ones(batch_size)*maxlent).to(device).long()
-            target_length = torch.sum(tmask, dim=1).long().to(device)
+            #input_length = (torch.ones(batch_size)*maxlent).to(device).long()
+            #target_length = torch.sum(tmask, dim=1).long().to(device)
             #preds = torch.transpose(torch.argmax(model_out, dim=2), 0, 1)
 
             loss = criterion(model_out, t, input_length, target_length)
