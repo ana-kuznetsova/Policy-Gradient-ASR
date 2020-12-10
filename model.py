@@ -137,7 +137,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
                 seq , score = ctc_decoder.decode(probs, beam_size=5)
                 #seq = ''.join([ind2char[ind] for ind in seq])
                 seq = collapse_fn_int(seq)
-                print(seq, score)
+                print(len(seq), score)
 
             optimizer.zero_grad()
     
