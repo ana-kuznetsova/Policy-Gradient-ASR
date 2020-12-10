@@ -101,3 +101,7 @@ def encode_trans(trans, char2ind, maxlen_t=7):
     res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(0))
     mask = [1 if i>=0 else 0 for i in res]
     return torch.tensor(res), torch.tensor(mask) 
+
+def pad(arr, maxlen):
+    res = np.pad(arr, (0, maxlen-len(arr)), 'constant', constant_values=(0))
+    return res

@@ -142,4 +142,4 @@ def collapse_fn_int(preds):
 		else:
 			prev=char
 			seq.append(char)
-	return seq
+	return np.array(seq)

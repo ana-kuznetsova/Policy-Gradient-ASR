@@ -12,7 +12,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 
 from loss import customNLLLoss
-from data import extract_feats, encode_trans
+from data import extract_feats, encode_trans, pad
 from CTCdecoder import CTCDecoder, collapse_fn, collapse_fn_int
 from metrics import evaluate, save_predictions
 
@@ -131,13 +131,17 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = torch.transpose(model_out, 0, 1)
             model_out = model_out.detach().cpu().numpy()
             fmask = fmask.detach().cpu().numpy()
+
+            preds = []
             for i, probs in enumerate(model_out):
                 pad_ind = int(np.sum(fmask[i]))
                 probs = np.exp(probs[:pad_ind,])
                 seq , score = ctc_decoder.decode(probs, beam_size=5)
-                #seq = ''.join([ind2char[ind] for ind in seq])
                 seq = collapse_fn_int(seq)
-                print(len(seq), score)
+                seq = pad(seq, maxlent)
+                print(seq.shape)
+                preds.append(seq)
+                
 
             optimizer.zero_grad()
     
