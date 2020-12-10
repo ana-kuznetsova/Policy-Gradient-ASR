@@ -16,9 +16,6 @@ from data import extract_feats, encode_trans
 from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
 
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
         self.df = pd.read_csv(csv_path, sep='\t')
@@ -64,7 +61,7 @@ class Encoder(nn.Module):
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
-                             num_layers=3,
+                             num_layers=1,
                              dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
