@@ -13,7 +13,7 @@ import torch.nn.functional as F
 
 from loss import customNLLLoss
 from data import extract_feats, encode_trans
-from CTCdecoder import CTCDecoder, collapse_fn
+from CTCdecoder import CTCDecoder, collapse_fn, collapse_fn_int
 from metrics import evaluate, save_predictions
 
 class Data(data.Dataset):
@@ -136,7 +136,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
                 probs = np.exp(probs[:pad_ind,])
                 seq , score = ctc_decoder.decode(probs, beam_size=5)
                 #seq = ''.join([ind2char[ind] for ind in seq])
-                seq = collapse_fn(seq)
+                seq = collapse_fn_int(seq)
                 print(seq, score)
 
             optimizer.zero_grad()
