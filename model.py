@@ -92,7 +92,7 @@ class Attention(nn.Module):
         scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
         for i, enc_hid in enumerate(enc_hid_states):
             score_i = torch.bmm(dec_hid.unsqueeze(1), enc_hid.unsqueeze(2))[:,0,0]
-            scores[:, i] = scores_i
+            scores[:, i] = score_i
             '''
             for row in range(enc_hid.shape[0]):
                 score_i = torch.matmul(dec_hid[row, :], enc_hid[row, :].T)
