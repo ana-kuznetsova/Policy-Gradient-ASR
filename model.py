@@ -216,11 +216,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
 
-
         losses.append(epoch_loss/len(loader))
         np.save(os.path.join(model_path, 'train_loss.npy'), np.array(losses))
         print('Epoch:{}/{} Training loss:{:>4f}'.format(epoch, num_epochs, epoch_loss/len(loader)))
 
+        torch.cuda.empty_cache()
         #Validation
         dev_dataset = Data(dev_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
         val_loss = 0
