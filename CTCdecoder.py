@@ -132,14 +132,14 @@ def collapse_fn(preds):
 
 def collapse_fn_int(preds):
 	seq = []
-    prev = None
-    for char in preds:
-        if not prev:
-            prev = char
-            seq.append(char)
-        if char == prev:
-            continue
-        else:
-            prev=char
-            seq.append(char)
-    return seq
+	prev = None
+	for char in preds:
+		if not prev:
+			prev = char
+			seq.append(char)
+		if char == prev:
+			continue
+		else:
+			prev=char
+			seq.append(char)
+	return seq
