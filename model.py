@@ -136,17 +136,14 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             for i, probs in enumerate(model_out):
                 pad_ind = int(np.sum(fmask[i]))
                 probs = np.exp(probs[:pad_ind,])
-                seq , _ = ctc_decoder.decode(probs, beam_size=5)
+                seq , _ = ctc_decoder.decode(probs, beam_size=5, blank=2)
                 seq = collapse_fn_int(seq)
                 seq = pad(seq, maxlent)
                 preds.append(seq)
             preds = torch.tensor(preds).to(device)
-            print(preds.shape)
-                
-
             optimizer.zero_grad()
     
-            loss = criterion(model_out, t)
+            loss = criterion(preds, t)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
             loss.backward()
             optimizer.step()
