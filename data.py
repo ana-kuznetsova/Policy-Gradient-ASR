@@ -98,8 +98,8 @@ def encode_trans(trans, char2ind, maxlen_t=7):
     trans: 
     '''
     res = np.array([char2ind[char] for char in trans])
-    print(len(res))
     res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(0))
+    print(res, len(res))
     mask = [1 if i>=0 else 0 for i in res]
     return torch.tensor(res), torch.tensor(mask) 
 
