@@ -31,12 +31,12 @@ def sample_trans(probs, alphabet, m=15):
         #Sample until get EOS
         y_m = []
         for distr in probs:
-            print(distr)
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
             if int(char_ind) != 0:
                 y_m.append(char_ind)
             else:
                 y_m.append(char_ind)
+                print(y_m)
                 sampled_trans.append(y_m)
                 y_m = []
                 break
