@@ -17,7 +17,7 @@ def reward(true_y, pred_y, t, ind2char, ctc_decoder):
         r_t = - (edit_dist(true_y, pred_y[:t+1]) - len(true_y))
     return r_t
 
-def sample_trans(probs, alphabet, m=15):
+def sample_trans(probs, mask, alphabet, m=15):
     '''
     Samples M transcriptions from the probability distribution:
     e.g. softmax output.
@@ -28,9 +28,10 @@ def sample_trans(probs, alphabet, m=15):
     
     sampled_trans = []
     for i in range(m):
-        #Sample until get EOS
         y_m = []
         for distr in probs:
+            pad_ind = np.sum(mask, axis=1)
+            print(pad_ind)
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
             if int(char_ind) != 0:
                 y_m.append(int(char_ind))
