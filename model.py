@@ -137,7 +137,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = torch.transpose(model_out, 0, 1)
             model_out = np.exp(model_out.detach().cpu().numpy())
             fmask = fmask.detach().cpu().numpy()
-            print(fmask.shape)
 
             ## Sample transcriptions
             sampled_ts = []

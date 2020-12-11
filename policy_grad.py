@@ -25,19 +25,13 @@ def sample_trans(probs, mask, alphabet, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
-    
+    pad_ind = int(np.sum(mask))
+    probs = probs[:pad_ind+1]
     sampled_trans = []
     for i in range(m):
         y_m = []
         for distr in probs:
-            pad_ind = np.sum(mask, axis=1)
-            print(pad_ind)
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
-            if int(char_ind) != 0:
-                y_m.append(int(char_ind))
-            else:
-                y_m.append(int(char_ind))
-                sampled_trans.append(y_m)
-                y_m = []
-                break
+            y_m.append(int(char_ind))
+        
     return np.array(sampled_trans)
