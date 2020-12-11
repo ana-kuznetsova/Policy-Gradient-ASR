@@ -27,6 +27,7 @@ def sample_trans(probs, mask, alphabet, m=15):
     '''
     pad_ind = int(np.sum(mask))
     probs = probs[:pad_ind+1]
+    print(probs.shape)
     sampled_trans = []
     for i in range(m):
         y_m = []
