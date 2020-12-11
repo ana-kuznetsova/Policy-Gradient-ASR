@@ -274,6 +274,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         preds = torch.transpose(preds, 0, 1)
         preds = preds.detach().cpu().numpy()
         fmask = fmask.detach().cpu().numpy()
+        tmask = tmask.detach().cpu().numpy()
         
         for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
