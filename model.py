@@ -142,7 +142,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             sampled_ts = []
             for i, probs in enumerate(model_out):
                 sampled_t = sample_trans(probs, fmask[i], alphabet)
-                print(sampled_t)
+                print(sampled_t.shape)
             '''
             input_lengths = torch.sum(fmask, dim=1).long()
             target_lengths = torch.sum(tmask, dim=1).long()
