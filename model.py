@@ -193,7 +193,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     
     device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
     model = Encoder(256, len(alphabet))
-    model.load_state_dict(torch.load(os.path.join(model_path, "test_model_best.pth")))
+    model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
     model = model.to(device)
 
     test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
