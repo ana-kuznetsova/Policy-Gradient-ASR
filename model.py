@@ -157,9 +157,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         alphabet = ['<pad>'] + fo.readlines()
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
-    ind2char = {char2ind[key]:key for key in char2ind}
 
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
     model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
     model.apply(weights)
 
@@ -234,18 +233,17 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
 
 
-def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
+def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
     with open(alphabet_path, 'r') as fo:
-        alphabet = fo.readlines()
-    alphabet = [char.strip() for char in alphabet] 
+        alphabet = ['<pad>'] + fo.readlines()
 
-    char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
+    char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
     ctc_decoder = CTCDecoder(alphabet)
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(alphabet))
+    device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
+    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
     model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
     model = model.to(device)
 
@@ -255,13 +253,16 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     total_WER = 0
     total_CER = 0
     step = 0
+    num_steps = len(loader)
 
     targets = []
     predicted = []
-
+    
+    print("Total number of examples: ", num_steps*batch_size)
+    
     for batch in loader:
         step+=1
-        print("Decoding step ", step)
+        print("Decoding step {}/{}...".format(step, num_steps))
         batch_WER = 0
         batch_CER = 0
 
@@ -277,7 +278,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
             probs = np.exp(probs[:pad_ind,])
-            seq , score = ctc_decoder.decode(probs, beam_size=5)
+            seq , _ = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
             pad_ind = int(np.sum(tmask[i]))
