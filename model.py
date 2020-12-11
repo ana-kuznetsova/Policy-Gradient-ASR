@@ -149,7 +149,7 @@ class Seq2Seq(nn.Module):
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
-          num_epochs=10,  batch_size=32):
+          num_epochs=10,  batch_size=32, device_id=0):
 
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
 
