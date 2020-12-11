@@ -277,13 +277,13 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         t = t.detach().cpu().numpy()
         fmask = fmask.detach().cpu().numpy()
         tmask = tmask.detach().cpu().numpy()
-        
+        print(preds.shape)
         for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
-            print(probs.shape)
-            print('pad ind', pad_ind)
+            #print(probs.shape)
+            #print('pad ind', pad_ind)
             probs = np.exp(probs[:pad_ind,])
-            print('padded', probs.shape)
+            #print('padded', probs.shape)
             seq , _ = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
