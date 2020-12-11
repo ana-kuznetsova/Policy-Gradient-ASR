@@ -101,7 +101,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     device = torch.device("cuda:" + str(device_id) if torch.cuda.is_available() else "cpu")
     if resume=='True':
         model = Encoder(256, len(alphabet))
-        model = model.load_state_dict(torch.load(os.path.join(model_path, 'model_best.pth')))
+        model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
+        
     else:
         model = Encoder(256, len(alphabet))
     model = model.to(device)
