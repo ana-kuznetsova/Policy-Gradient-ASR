@@ -24,6 +24,7 @@ def sample_trans(probs, alphabet, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
+    probs = probs.detach().cpu().numpy()
     sampled_trans = []
     for i in range(m):
         #Sample until get EOS
