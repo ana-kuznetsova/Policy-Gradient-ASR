@@ -185,9 +185,8 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
     alphabet = [char.replace('\n', '') for char in alphabet]
-    print(alphabet)
 
-    char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
+    char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
     ctc_decoder = CTCDecoder(alphabet)
