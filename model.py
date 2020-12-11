@@ -272,6 +272,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         fmask = batch['fmask'].squeeze(1).to(device)
         tmask = batch['tmask'].squeeze(1).to(device)
         preds = model(x, t, fmask, device)
+        print(preds.shape)
         preds = torch.transpose(preds, 0, 1)
 
         preds = preds.detach().cpu().numpy()
