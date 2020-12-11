@@ -32,12 +32,12 @@ def preproc(corpus_path):
     punctuation = punctuation + '«»½“”…'
     
     ## Remove punct
-    train_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+    train_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in train['sentence']]
-    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation])\
+    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in dev['sentence']]
     
-    test_sents = [''.join([char for char in sent.lower() if char not in punctuation])\
+    test_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
                    for sent in test['sentence']]
     
     ##Write modified df
@@ -58,8 +58,12 @@ def preproc(corpus_path):
             if char not in chars:
                 chars.append(char)
 
+    chars = sorted(chars)
+    temp = chars[0]
+    chars[0] = chars[1]
+    chars[1] = temp
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
-        for char in sorted(chars):
+        for char in chars:
             fo.write(char+'\n')
         
 
@@ -94,6 +98,10 @@ def encode_trans(trans, char2ind, maxlen_t=7):
     trans: 
     '''
     res = np.array([char2ind[char] for char in trans])
-    res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(-1))
-    mask = [1 if i>=0 else 0 for i in res]
+    res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(0))
+    mask = [1 if i>0 else 0 for i in res]
     return torch.tensor(res), torch.tensor(mask) 
+
+def pad(arr, maxlen):
+    res = np.pad(arr, (0, maxlen-len(arr)), 'constant', constant_values=(0))
+    return res
