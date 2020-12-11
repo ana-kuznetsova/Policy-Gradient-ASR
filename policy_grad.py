@@ -27,12 +27,11 @@ def sample_trans(probs, mask, alphabet, m=15):
     '''
     pad_ind = int(np.sum(mask))
     probs = probs[:pad_ind+1]
-    print(probs.shape)
     sampled_trans = []
     for i in range(m):
         y_m = []
         for distr in probs:
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
             y_m.append(int(char_ind))
-        
+        sampled_trans.append(y_m)
     return np.array(sampled_trans)
