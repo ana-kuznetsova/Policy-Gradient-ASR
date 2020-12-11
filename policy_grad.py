@@ -26,12 +26,12 @@ def sample_trans(probs, alphabet, m=15):
         probs: softmax output for current training example
     '''
     
-    print(probs.shape)
     sampled_trans = []
     for i in range(m):
         #Sample until get EOS
         y_m = []
-        for distr in range(probs):
+        for distr in probs:
+            print(distr)
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
             if int(char_ind) != 0:
                 y_m.append(char_ind)
