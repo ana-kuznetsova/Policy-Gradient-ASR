@@ -33,9 +33,9 @@ def sample_trans(probs, alphabet, m=15):
         for distr in probs:
             char_ind = np.random.choice(len(alphabet), 1, p=distr)
             if int(char_ind) != 0:
-                y_m.append(char_ind)
+                y_m.append(int(char_ind))
             else:
-                y_m.append(char_ind)
+                y_m.append(int(char_ind))
                 sampled_trans.append(y_m)
                 y_m = []
                 break
