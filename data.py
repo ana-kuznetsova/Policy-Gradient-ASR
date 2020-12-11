@@ -59,7 +59,6 @@ def preproc(corpus_path):
                 chars.append(char)
 
     chars = sorted(chars)
-    print("sorted:", chars)
     temp = chars[0]
     chars[0] = chars[1]
     chars[1] = temp
