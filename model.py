@@ -16,6 +16,8 @@ from data import extract_feats, encode_trans, pad
 from CTCdecoder import CTCDecoder, collapse_fn, collapse_fn_int
 from metrics import evaluate, save_predictions
 
+from policy_grad import sample_trans
+
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
         self.df = pd.read_csv(csv_path, sep='\t')
@@ -96,7 +98,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
-    ind2char = {char2ind[key]:key for key in char2ind}
+    #ind2char = {char2ind[key]:key for key in char2ind}
 
     device = torch.device("cuda:" + str(device_id) if torch.cuda.is_available() else "cpu")
     if resume=='True':
@@ -132,6 +134,9 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
     
             model_out = model(x, fmask)
+            sampled_t = sample_trans(model_out)
+            print(sampled_t)
+            '''
             input_lengths = torch.sum(fmask, dim=1).long()
             target_lengths = torch.sum(tmask, dim=1).long()
     
@@ -178,6 +183,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
+        '''
 
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
