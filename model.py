@@ -102,7 +102,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     if resume=='True':
         print("Loaded weights from pretrained...")
         model = Encoder(256, len(alphabet))
-        model.load_state_dict(torch.load(os.path.join(model_path, "model_last.pth")))
+        model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
         for param in model.parameters():
             print(param.data)
         
