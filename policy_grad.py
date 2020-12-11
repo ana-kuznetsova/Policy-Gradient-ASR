@@ -36,7 +36,6 @@ def sample_trans(probs, alphabet, m=15):
                 y_m.append(char_ind)
             else:
                 y_m.append(char_ind)
-                print(y_m)
                 sampled_trans.append(y_m)
                 y_m = []
                 break

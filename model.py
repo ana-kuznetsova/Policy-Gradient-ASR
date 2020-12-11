@@ -137,10 +137,11 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = torch.transpose(model_out, 0, 1)
             model_out = np.exp(model_out.detach().cpu().numpy())
 
+            ## Sample transcriptions
             sampled_ts = []
             for i, probs in enumerate(model_out):
                 sampled_t = sample_trans(probs, alphabet)
-            print(sampled_t)
+                print(sampled_t)
             '''
             input_lengths = torch.sum(fmask, dim=1).long()
             target_lengths = torch.sum(tmask, dim=1).long()
