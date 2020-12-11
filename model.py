@@ -134,7 +134,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
     
             model_out = model(x, fmask)
-            model_out = probs = torch.transpose(probs, 0, 1)
+            model_out = torch.transpose(probs, 0, 1)
             model_out = np.exp(model_out.detach().cpu().numpy())
 
             sampled_ts = []
