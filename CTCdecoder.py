@@ -116,6 +116,12 @@ class CTCDecoder:
 		return best[0], -self.logsumexp(*best[1])
 
 
+def predict_greedy(probs):
+	seq = []
+	for t_step in probs:
+		seq.append(int(np.argmax(t_step)))
+	return seq
+
 def collapse_fn(preds):
     seq = ''
     prev = ''
