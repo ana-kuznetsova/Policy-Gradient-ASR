@@ -1,6 +1,7 @@
 from metrics import edit_dist
 from CTCdecoder import collapse_fn
 import numpy as np
+import torch
 
 def reward(true_y, pred_y, t, ind2char, ctc_decoder):
 
@@ -24,7 +25,7 @@ def sample_trans(probs, alphabet, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
-    probs = np.exp(probs.detach().cpu().numpy())
+    
     print(probs.shape)
     sampled_trans = []
     for i in range(m):

@@ -134,7 +134,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
     
             model_out = model(x, fmask)
-            sampled_t = sample_trans(model_out, alphabet)
+            model_out = probs = torch.transpose(probs, 0, 1)
+            model_out = np.exp(model_out.detach().cpu().numpy())
+
+            sampled_ts = []
+            for i, probs in enumerate(model_out):
+                sampled_t = sample_trans(probs, alphabet)
             print(sampled_t)
             '''
             input_lengths = torch.sum(fmask, dim=1).long()
