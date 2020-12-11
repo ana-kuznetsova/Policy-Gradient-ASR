@@ -87,7 +87,7 @@ class Encoder(nn.Module):
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
-          num_epochs=10,  batch_size=32):
+          num_epochs=10,  batch_size=32, resume='False'):
 
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
 
@@ -98,7 +98,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     model = Encoder(256, len(alphabet))
     model = model.to(device)
 
