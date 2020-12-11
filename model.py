@@ -87,7 +87,7 @@ class Encoder(nn.Module):
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
-          num_epochs=10,  batch_size=32, resume='False'):
+          num_epochs=10,  batch_size=32, resume='False', device_id=0):
 
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
 
@@ -98,15 +98,17 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    model = Encoder(256, len(alphabet))
+    device = torch.device("cuda:" + str(device_id) if torch.cuda.is_available() else "cpu")
+    if resume=='True':
+        model = Encoder(256, len(alphabet))
+        model = model.load_state_dict(torch.load(os.path.join(model_path, 'model_best.pth')))
+    else:
+        model = Encoder(256, len(alphabet))
     model = model.to(device)
 
     criterion = torch.nn.CTCLoss(blank=2, zero_infinity=True)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
-    ctc_decoder = CTCDecoder(alphabet)
-    
 
     init_val_loss = 9999999
 
@@ -164,7 +166,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
         curr_val_loss = val_loss/len(loader)
         val_losses.append(curr_val_loss)
-        np.save(os.path.join(model_path, "val_losses.npy"), np.array(val_losses))
+        np.save(os.path.join(model_path, "val_loss.npy"), np.array(val_losses))
         torch.cuda.empty_cache() 
 
         print('Epoch:{}/{} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
