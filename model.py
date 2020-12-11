@@ -191,8 +191,8 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     ctc_decoder = CTCDecoder(alphabet)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(alphabet))
-    model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
+    model = Encoder(256, len(alphabet))
+    model.load_state_dict(torch.load(os.path.join(model_path, "test_model_best.pth")))
     model = model.to(device)
 
     test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
@@ -223,7 +223,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         for i, probs in enumerate(preds):
             pad_ind = int(np.sum(fmask[i]))
             probs = np.exp(probs[:pad_ind,])
-            seq , score = ctc_decoder.decode(probs, beam_size=5)
+            seq , _ = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
             pad_ind = int(np.sum(tmask[i]))
