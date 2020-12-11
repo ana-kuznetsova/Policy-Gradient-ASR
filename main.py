@@ -11,7 +11,7 @@ def main(args):
             args.resume, args.device)
    elif args.mode=='predict':
       predict(args.test_path, args.aud_path, args.alphabet, args.model_path, 
-              args.batch_size, args.maxlen, args.maxlent)
+              args.batch_size, args.maxlen, args.maxlent, args.device)
    elif args.mode=='preproc':
       preproc(args.corpus_path)
 

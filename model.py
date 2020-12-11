@@ -180,17 +180,18 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
 
 
-def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent):
+def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
+
     with open(alphabet_path, 'r') as fo:
-        alphabet = fo.readlines()
-    alphabet = [char.strip() for char in alphabet] 
+        alphabet = ['<pad>'] + fo.readlines()
+    alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].strip():i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
 
     ctc_decoder = CTCDecoder(alphabet)
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
     model = Encoder(256, len(alphabet))
     model.load_state_dict(torch.load(os.path.join(model_path, "test_model_best.pth")))
     model = model.to(device)
@@ -207,7 +208,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
 
     for batch in loader:
         step+=1
-        print("Decoding step ", step)
+        print("Decoding step: ", step)
         batch_WER = 0
         batch_CER = 0
 
@@ -215,8 +216,7 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         t = batch['trans'].numpy()
         tmask = batch['tmask'].squeeze(1).numpy()
         fmask = batch['fmask'].squeeze(1).to(device)
-        dec_input = torch.randn(x.shape[0], 128, requires_grad=True).to(device)
-        preds = model(x, fmask, dec_input)
+        preds = model(x, fmask)
         preds = torch.transpose(preds, 0, 1).detach().cpu().numpy()
         fmask = fmask.detach().cpu().numpy()
         
