@@ -130,6 +130,12 @@ def collapse_fn(preds):
             seq+=char
     return seq
 
+def predict_greedy(probs):
+	seq = []
+	for t_step in probs:
+		seq.append(int(np.argmax(t_step)))
+	return seq
+
 def collapse_fn_int(preds):
 	seq = []
 	prev = None
