@@ -24,7 +24,7 @@ def sample_trans(probs, alphabet, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
-    probs = probs.detach().cpu().numpy()
+    probs = np.exp(probs.detach().cpu().numpy())
     print(probs)
     sampled_trans = []
     for i in range(m):
