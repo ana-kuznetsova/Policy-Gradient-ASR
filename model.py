@@ -202,13 +202,14 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     total_WER = 0
     total_CER = 0
     step = 0
+    num_steps = len(loader)
 
     targets = []
     predicted = []
 
     for batch in loader:
         step+=1
-        print("Decoding step: ", step)
+        print("Step {}/{}. Loss: {:>4f}".format(step, num_steps))
         batch_WER = 0
         batch_CER = 0
 
