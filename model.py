@@ -123,10 +123,10 @@ class Decoder(nn.Module):
 
         for inp in torch.transpose(target_inputs, 0, 1):
             embedded = self.embed_layer(inp)
-            print(embedded.shape)
             dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
             #combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
             output_i = self.output(dec_out)
+            print(output_i.shape)
             output_i = F.log_softmax(output_i, dim=1)
             dec_outputs.append(output_i)
 
