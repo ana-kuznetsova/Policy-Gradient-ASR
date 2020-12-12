@@ -116,7 +116,6 @@ class Decoder(nn.Module):
         '''
       
         dec_hid = encoder_outputs[-1].unsqueeze(0)
-        print(dec_hid.shape)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
         c_i = torch.zeros(dec_hid.shape).to(device)
@@ -124,6 +123,7 @@ class Decoder(nn.Module):
 
         for inp in torch.transpose(target_inputs, 0, 1):
             embedded = self.embed_layer(inp)
+            print(embedded.shape)
             dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
             #combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
             output_i = self.output(dec_out)
