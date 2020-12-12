@@ -127,10 +127,11 @@ class Decoder(nn.Module):
             #combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
             output_i = self.output(dec_out)
             output_i = F.log_softmax(output_i, dim=1)
+            print(output_i.shape)
             dec_outputs.append(output_i)
 
         dec_outputs = torch.stack(dec_outputs)
-        print(dec_outputs.shape)
+        #print(dec_outputs.shape)
         return dec_outputs
 
 
