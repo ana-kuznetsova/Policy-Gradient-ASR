@@ -130,7 +130,7 @@ class Decoder(nn.Module):
             dec_outputs.append(output_i)
 
         dec_outputs = torch.stack(dec_outputs)
-        print(dec_outputs.shape)
+        #print(dec_outputs.shape)
         return dec_outputs
 
 
