@@ -116,6 +116,7 @@ class Decoder(nn.Module):
         '''
       
         dec_hid = encoder_outputs[-1].unsqueeze(0)
+        print(dec_hid)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
         c_i = torch.zeros(dec_hid.shape).to(device)
