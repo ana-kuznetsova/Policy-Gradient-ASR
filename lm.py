@@ -369,4 +369,4 @@ class LanguageModel:
 if __name__ == "__main__":
     logging.root.setLevel(logging.NOTSET)
     lm = LanguageModel()
-    lm_model, token_to_idx, idx_to_token = lm.train(filename = "transcripts.txt", num_layers=2, dropout=0.05, emb_size=100,                    hidden_size=200, num_epochs=50, batch_size=10, learning_rate=0.01)
+    lm_model, token_to_idx, idx_to_token = lm.train(filename = "transcripts.txt", num_layers=2, dropout=0.05, emb_size=100,                    hidden_size=200, num_epochs=100, batch_size=10, learning_rate=0.01)
