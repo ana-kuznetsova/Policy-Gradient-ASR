@@ -187,12 +187,13 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
-            fmask = batch['fmask'].squeeze(1).numpy()
+            fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).numpy()
             
             model_out = model(x, t, fmask, device).detach().cpu().numpy()
-            print(tmask.shape)
+            print('mask shape',tmask.shape)
             sampled_t = sample_trans(model_out, tmask, alphabet)
+            '''
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
@@ -235,7 +236,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
-
+'''
 '''
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
     with open(alphabet_path, 'r') as fo:
