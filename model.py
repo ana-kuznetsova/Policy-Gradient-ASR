@@ -89,7 +89,7 @@ class Encoder(nn.Module):
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
-          num_epochs=10,  batch_size=32, resume='False', device_id=0):
+          num_epochs=10,  batch_size=32, device_id=0):
 
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
 
@@ -98,7 +98,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
-    #ind2char = {char2ind[key]:key for key in char2ind}
+
+    device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
+    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
+    model.apply(weights)
 
     device = torch.device("cuda:" + str(device_id) if torch.cuda.is_available() else "cpu")
     if resume=='True':
@@ -194,10 +197,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
 
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
-
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
-    alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
     ind2char = {char2ind[key]:key for key in char2ind}
@@ -205,8 +206,8 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
     ctc_decoder = CTCDecoder(alphabet)
     
     device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
-    model = Encoder(256, len(alphabet))
-    model.load_state_dict(torch.load(os.path.join(model_path, "test_model_best.pth")))
+    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
+    model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
     model = model.to(device)
 
     test_dataset = Data(test_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
@@ -219,7 +220,9 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
 
     targets = []
     predicted = []
-
+    
+    print("Total number of examples: ", num_steps*batch_size)
+    
     for batch in loader:
         step+=1
         print("Decoding step {}/{}...".format(step, num_steps))
@@ -227,17 +230,20 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         batch_CER = 0
 
         x = batch['aud'].to(device)
-        t = batch['trans'].numpy()
-        tmask = batch['tmask'].squeeze(1).numpy()
+        t = batch['trans'].to(device)
         fmask = batch['fmask'].squeeze(1).to(device)
-        preds = model(x, fmask)
-        preds = torch.transpose(preds, 0, 1).detach().cpu().numpy()
-        fmask = fmask.detach().cpu().numpy()
-        
+        tmask = batch['tmask'].squeeze(1).to(device)
+        preds = model(x, t, fmask, device)
+        preds = torch.transpose(preds, 0, 1)
+
+        preds = preds.detach().cpu().numpy()
+        t = t.detach().cpu().numpy()
+        #fmask = fmask.detach().cpu().numpy()
+        tmask = tmask.detach().cpu().numpy()
         for i, probs in enumerate(preds):
-            pad_ind = int(np.sum(fmask[i]))
+            pad_ind = int(np.sum(tmask[i]))
             probs = np.exp(probs[:pad_ind,])
-            #seq , _ = ctc_decoder.decode(probs, beam_size=5)
+            seq , _ = ctc_decoder.decode(probs, beam_size=5)
             seq = ''.join([ind2char[ind] for ind in seq])
             seq = collapse_fn(seq)
             pad_ind = int(np.sum(tmask[i]))
