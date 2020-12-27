@@ -24,7 +24,7 @@ def sample_trans(probs, mask, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
-    
+
     pad_ind = int(np.sum(mask))
     probs = np.exp(probs[:pad_ind+1])
     sampled_trans = []
@@ -35,6 +35,9 @@ def sample_trans(probs, mask, m=15):
             y_m.append(int(char_ind))
             if char_ind==1:
                 break
+        y_m = np.array(y_m)
+        y_m = np.pad(y_m, (0, mask.shape[0]-len(y_m)), 'constant', constant_values=(0))
+        print('padded:', y_m.shape)
         sampled_trans.append(y_m)
     sampled_trans = np.array(sampled_trans)
     print(sampled_trans.shape)
