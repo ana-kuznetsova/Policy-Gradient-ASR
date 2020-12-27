@@ -191,6 +191,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).numpy()
             
             model_out = model(x, t, fmask, device).detach().cpu().numpy()
+            print(tmask.shape)
             sampled_t = sample_trans(model_out, tmask, alphabet)
             optimizer.zero_grad()
     
