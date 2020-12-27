@@ -1,5 +1,5 @@
 from model import train
-from model import predict
+#from model import predict
 from data import find_maxlen, preproc
 import argparse
 
