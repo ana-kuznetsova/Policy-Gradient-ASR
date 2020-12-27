@@ -187,10 +187,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             step+=1
             x = batch['aud'].to(device)
             t = batch['trans'].to(device)
-            fmask = batch['fmask'].squeeze(1).to(device)
-            tmask = batch['tmask'].squeeze(1).to(device)
+            fmask = batch['fmask'].squeeze(1).numpy()
+            tmask = batch['tmask'].squeeze(1).numpy()
             
-            model_out = model(x, t, fmask, device)
+            model_out = model(x, t, fmask, device).detach().cpu().numpy()
             sampled_t = sample_trans(model_out, tmask, alphabet)
             optimizer.zero_grad()
     
