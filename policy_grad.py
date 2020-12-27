@@ -1,5 +1,4 @@
 from metrics import edit_dist
-from CTCdecoder import collapse_fn
 import numpy as np
 import torch
 
