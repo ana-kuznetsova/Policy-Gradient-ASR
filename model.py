@@ -15,6 +15,9 @@ from loss import customNLLLoss
 from data import extract_feats, encode_trans
 from metrics import evaluate, save_predictions
 
+### POLICY GRAD IMPORTS ###
+from policy_grad import sample_trans
+
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
         self.df = pd.read_csv(csv_path, sep='\t')
@@ -154,7 +157,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
-    print("len alpha", len(alphabet))
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
@@ -189,7 +191,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             
             model_out = model(x, t, fmask, device)
-            print("out_shape:", model_out.shape)
+            sampled_t = sample_trans(model_out)
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
