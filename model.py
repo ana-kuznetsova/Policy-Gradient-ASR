@@ -154,6 +154,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
+    print("len alpha", len(alphabet))
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
