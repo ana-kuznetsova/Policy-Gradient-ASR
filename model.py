@@ -190,9 +190,10 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).numpy()
             
-            model_out = model(x, t, fmask, device).detach().cpu().numpy()
-            print('mask shape',tmask.shape)
-            sampled_t = sample_trans(model_out, tmask, alphabet)
+            model_out = model(x, t, fmask, device)
+            model_out = torch.transpose(model_out, 0, 1).detach().cpu().numpy()
+            for i in range(model_out.shape[0]):
+                sampled_t = sample_trans(model_out[i], tmask[i], alphabet)
             '''
             optimizer.zero_grad()
     

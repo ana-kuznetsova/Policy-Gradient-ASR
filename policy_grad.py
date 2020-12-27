@@ -24,7 +24,8 @@ def sample_trans(probs, mask, alphabet, m=15):
         m: number of samples
         probs: softmax output for current training example
     '''
-    pad_ind = int(np.sum(mask, axis=0))
+    
+    pad_ind = int(np.sum(mask))
     print("pad:", pad_ind)
     probs = probs[:pad_ind+1]
     print(probs.shape)
