@@ -16,7 +16,7 @@ def reward(true_y, pred_y, t, ind2char, ctc_decoder):
         r_t = - (edit_dist(true_y, pred_y[:t+1]) - len(true_y))
     return r_t
 
-def sample_trans(probs, mask, alphabet, m=15):
+def sample_trans(probs, mask, m=15):
     '''
     Samples M transcriptions from the probability distribution:
     e.g. softmax output.
@@ -26,14 +26,15 @@ def sample_trans(probs, mask, alphabet, m=15):
     '''
     
     pad_ind = int(np.sum(mask))
-    print("pad:", pad_ind)
     probs = probs[:pad_ind+1]
-    print(probs.shape)
     sampled_trans = []
     for i in range(m):
         y_m = []
         for distr in probs:
-            char_ind = np.random.choice(len(alphabet), 1, p=distr)
+            char_ind = np.random.choice(probs.shape[1], 1, p=distr)
             y_m.append(int(char_ind))
+            if char_ind==1:
+                print('sampled_t len', len(y_m))
+                break
         sampled_trans.append(y_m)
     return np.array(sampled_trans)

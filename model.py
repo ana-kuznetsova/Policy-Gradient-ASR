@@ -193,7 +193,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             model_out = model(x, t, fmask, device)
             model_out = torch.transpose(model_out, 0, 1).detach().cpu().numpy()
             for i in range(model_out.shape[0]):
-                sampled_t = sample_trans(model_out[i], tmask[i], alphabet)
+                sampled_t = sample_trans(model_out[i], tmask[i])
             '''
             optimizer.zero_grad()
     
