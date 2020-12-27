@@ -34,7 +34,7 @@ def sample_trans(probs, mask, m=15):
             char_ind = np.random.choice(probs.shape[1], 1, p=distr)
             y_m.append(int(char_ind))
             if char_ind==1:
-                print('sampled_t len', len(y_m))
                 break
         sampled_trans.append(y_m)
+    print(np.array(sample_trans).shape)
     return np.array(sampled_trans)
