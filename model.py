@@ -191,7 +191,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             tmask = batch['tmask'].squeeze(1).to(device)
             
             model_out = model(x, t, fmask, device)
-            sampled_t = sample_trans(model_out)
+            sampled_t = sample_trans(model_out, tmask, alphabet)
             optimizer.zero_grad()
     
             loss = criterion(model_out, t)
