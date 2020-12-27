@@ -36,5 +36,6 @@ def sample_trans(probs, mask, m=15):
             if char_ind==1:
                 break
         sampled_trans.append(y_m)
-    print(sampled_trans)
-    return np.array(sampled_trans)
+    sampled_trans = np.array(sampled_trans)
+    print(sampled_trans.shape)
+    return sampled_trans
