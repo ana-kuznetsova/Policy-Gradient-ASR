@@ -12,11 +12,8 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 
 from loss import customNLLLoss
-from data import extract_feats, encode_trans, pad
-from CTCdecoder import CTCDecoder, collapse_fn, collapse_fn_int, predict_greedy
+from data import extract_feats, encode_trans
 from metrics import evaluate, save_predictions
-
-from policy_grad import sample_trans
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
@@ -58,17 +55,15 @@ def nan_to_num(t,mynan=0.):
     return torch.cat([nan_to_num(l).unsqueeze(0) for l in t],0)
 
 class Encoder(nn.Module):
-    def __init__(self, hidden_size, output_size):
+    def __init__(self):
         super().__init__()
-        self.input_layer = nn.Linear(120, 2 * hidden_size)
-        self.blstm = nn.LSTM(input_size= 2 * hidden_size, 
-                             hidden_size=hidden_size, 
-                             num_layers=3,
+        self.input_layer = nn.Linear(120, 512)
+        self.blstm = nn.LSTM(input_size=512, 
+                             hidden_size=256, 
+                             num_layers=2,
                              dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
-        self.output_layer = nn.Linear(2*hidden_size, output_size)
-        self.log_softmax = torch.nn.LogSoftmax(dim=2)
         
     def forward(self, x, mask):
         outputs=[]
@@ -83,9 +78,73 @@ class Encoder(nn.Module):
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
-        output = self.output_layer(output)
-        output = self.log_softmax(output)
         return output
+    
+class Attention(nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+    def forward(self, enc_hid_states, dec_hid, device):
+        enc_hid_states = torch.transpose(enc_hid_states, 0, 1)
+        scores = torch.zeros(dec_hid.shape[0], enc_hid_states.shape[0]).to(device)
+        for i, enc_hid in enumerate(enc_hid_states):
+            score_i = torch.bmm(dec_hid.unsqueeze(1), enc_hid.unsqueeze(2))[:,0,0]
+            scores[:, i] = score_i
+        
+        align = F.softmax(scores, dim=1)
+        c_t = torch.zeros(dec_hid.shape).to(device)
+        for i, enc_hid in enumerate(enc_hid_states):
+            c_t+= align[:, i].unsqueeze(1)*enc_hid
+        return c_t
+        
+    
+class Decoder(nn.Module):
+    def __init__(self, output_size, hidden_size):
+        super().__init__()
+        self.embed_layer = nn.Embedding(output_size, 128)
+        #self.lstm_cell = nn.LSTMCell(128, hidden_size)
+        self.lstm = nn.LSTM(input_size=128, 
+                            hidden_size=hidden_size, 
+                            num_layers=1,
+                            dropout=0.3)
+        self.output = nn.Linear(2* hidden_size, output_size)
+        self.attention = Attention()
+        self.drop_lstm = nn.Dropout(p=0.3)
+
+    def forward(self, target_inputs, encoder_outputs, device=None):
+        '''
+        y is a target sentence
+        '''
+      
+        dec_hid = encoder_outputs[-1].unsqueeze(0)
+
+        encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
+        c_i = torch.zeros(dec_hid.shape).to(device)
+        dec_outputs = []
+
+        for inp in torch.transpose(target_inputs, 0, 1):
+            embedded = self.embed_layer(inp)
+            dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
+            context = self.attention(encoder_outputs, dec_out.squeeze(0), device)
+            combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
+            output_i = self.output(combined_input)
+            output_i = F.log_softmax(output_i, dim=1)
+            dec_outputs.append(output_i)
+
+        dec_outputs = torch.stack(dec_outputs)
+        return dec_outputs
+
+
+class Seq2Seq(nn.Module):
+    def __init__(self, alphabet_size, batch_size, maxlen):
+        super().__init__()
+        self.encoder = Encoder()
+        self.decoder = Decoder(alphabet_size, 512)
+
+    def forward(self, x, t, fmask, device,):
+        enc_out = self.encoder(x, fmask)
+        dec_out = self.decoder(t, enc_out, device=device)
+        return dec_out
 
 
 def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
@@ -95,7 +154,6 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
-    alphabet = [char.replace('\n', '') for char in alphabet]
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
@@ -103,19 +161,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
     model.apply(weights)
 
-    device = torch.device("cuda:" + str(device_id) if torch.cuda.is_available() else "cpu")
-    if resume=='True':
-        print("Loaded weights from pretrained...")
-        model = Encoder(256, len(alphabet))
-        model.load_state_dict(torch.load(os.path.join(model_path, "model_best.pth")))
-        
-    else:
-        model = Encoder(256, len(alphabet))
     model = model.to(device)
 
-    criterion = torch.nn.CTCLoss(blank=2, zero_infinity=True)
+    criterion = customNLLLoss(ignore_index=0)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     best_model = copy.deepcopy(model.state_dict())
+    
 
     init_val_loss = 9999999
 
@@ -135,26 +186,12 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-    
-            model_out = model(x, fmask)
-            model_out = torch.transpose(model_out, 0, 1)
-            model_out = np.exp(model_out.detach().cpu().numpy())
-            fmask = fmask.detach().cpu().numpy()
-
-            ## Sample transcriptions
-            sampled_ts = []
-            for i, probs in enumerate(model_out):
-                sampled_t = sample_trans(probs, fmask[i], alphabet)
-                print(sampled_t.shape)
-            '''
-            input_lengths = torch.sum(fmask, dim=1).long()
-            target_lengths = torch.sum(tmask, dim=1).long()
-    
+            
+            model_out = model(x, t, fmask, device)
             optimizer.zero_grad()
     
-            loss = criterion(model_out, t, input_lengths, target_lengths)
+            loss = criterion(model_out, t)
             print("Step {}/{}. Loss: {:>4f}".format(step, num_steps, loss.detach().cpu().numpy()))
-
             loss.backward()
             optimizer.step()
             epoch_loss+=loss.detach().cpu().numpy()
@@ -174,16 +211,16 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
+            
+            model_out = model(x, t, fmask, device)
     
-            model_out = model(x, fmask)
-            input_lengths = torch.sum(fmask, dim=1).long()
-            target_lengths = torch.sum(tmask, dim=1).long()
+            loss = criterion(model_out, t)
 
             val_loss+=loss.detach().cpu().numpy()
 
         curr_val_loss = val_loss/len(loader)
         val_losses.append(curr_val_loss)
-        np.save(os.path.join(model_path, "val_loss.npy"), np.array(val_losses))
+        np.save(os.path.join(model_path, "val_losses.npy"), np.array(val_losses))
         torch.cuda.empty_cache() 
 
         print('Epoch:{}/{} Validation loss:{:>4f}'.format(epoch, num_epochs, curr_val_loss))
@@ -193,9 +230,8 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             torch.save(best_model, os.path.join(model_path, "model_best.pth"))
             init_val_loss = curr_val_loss
         torch.save(best_model, os.path.join(model_path, "model_last.pth"))
-        '''
 
-
+'''
 def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, maxlent, device_id=0):
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
@@ -259,3 +295,4 @@ def predict(test_path, aud_path, alphabet_path, model_path, batch_size, maxlen, 
         total_CER+=batch_CER/batch_size
     save_predictions(targets, predicted, model_path)
     print("CER: {:>4f} WER: {:>4f}".format(total_CER/len(loader), total_WER/len(loader)))
+'''
