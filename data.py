@@ -54,7 +54,7 @@ def preproc(corpus_path):
             fo.write(char+'\n')
 
 
-def extract_feats(paths):
+def extract_feats(data):
     '''
     Reads and processes one file at a time.
     Args:
@@ -63,10 +63,10 @@ def extract_feats(paths):
     '''
     maxlen_feats = 0
     unpadded = []
-    print("EXTRACT:", paths)
 
-    for path in paths:
-        waveform, sample_rate = torchaudio.load(path)
+    for inst in data:
+        print(inst["aud"])
+        waveform, sample_rate = torchaudio.load(inst["aud"])
         #Calculate MFCC
         mfcc = torchaudio.transforms.MFCC()(waveform)
         #Calculate delta and double-delta
@@ -125,10 +125,8 @@ def collate_custom(data):
    
     #{"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
 
-    print("COLLATE", data[:1])
-
-    feats, fmasks = extract_feats(data["aud"])
-    transcrpts, tmasks = encode_trans(data["trans"], data["charmap"])
+    feats, fmasks = extract_feats(data)
+    transcrpts, tmasks = encode_trans(data)
     return {"feat": feats, "fmask":fmasks, "trans":transcrpts, "tmask":tmasks}
 
 class Data(data.Dataset):
