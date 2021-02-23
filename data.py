@@ -72,6 +72,7 @@ def extract_feats(data):
         deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
         res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
+        print(res.shape)
         unpadded.append(res)
 
         if res.shape[0] > maxlen_feats:
@@ -83,6 +84,7 @@ def extract_feats(data):
     for tens in unpadded:
         tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
                                           mode="constant",value=0)
+        print(tens.shape)
 
         mask = torch.ones(1, tens.shape[1])
         mask = nn.functional.pad(mask, pad=(0, maxlen_feats-mask.shape[1], 0, 0), 
@@ -110,9 +112,7 @@ def encode_trans(data):
             maxlen_t = res.shape[0]
 
     for t in unpadded:
-        print("MAXLENT:", maxlen_t-t.shape[0], t.shape[0])
         res = nn.functional.pad(t, pad=(0, maxlen_t-t.shape[0]), mode="constant",value=0)
-        print(res.shape)
         encoded.append(res)
         mask = torch.tensor([1 if i>0 else 0 for i in res])
         masks.append(mask)
