@@ -63,6 +63,7 @@ def extract_feats(paths):
     '''
     maxlen_feats = 0
     unpadded = []
+    print("EXTRACT:", paths)
 
     for path in paths:
         waveform, sample_rate = torchaudio.load(path)
@@ -123,7 +124,6 @@ def collate_custom(data):
     '''
    
     #{"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
-    print("COllate:", data)
 
     feats, fmasks = extract_feats(data["aud"])
     transcrpts, tmasks = encode_trans(data["trans"], data["charmap"])
