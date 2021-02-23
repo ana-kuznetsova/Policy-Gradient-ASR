@@ -32,9 +32,8 @@ def nan_to_num(t,mynan=0.):
     return torch.cat([nan_to_num(l).unsqueeze(0) for l in t],0)
 
 class Encoder(nn.Module):
-    def __init__(self, batch_size):
+    def __init__(self):
         super().__init__()
-        self.layer_norm = nn.LayerNorm(batch_size)
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
@@ -45,7 +44,8 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         print("encoder inp:", x.shape)
-        x = self.layer_norm(x)
+        lnorm = nn.LayerNorm(x.shape[1:])
+        x = lnorm(x)
         print("layer norm:", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
@@ -117,9 +117,9 @@ class Decoder(nn.Module):
 
 
 class Seq2Seq(nn.Module):
-    def __init__(self, alphabet_size, batch_size):
+    def __init__(self, alphabet_size):
         super().__init__()
-        self.encoder = Encoder(batch_size)
+        self.encoder = Encoder()
         self.decoder = Decoder(alphabet_size, 512)
 
     def forward(self, x, t, fmask, device):
