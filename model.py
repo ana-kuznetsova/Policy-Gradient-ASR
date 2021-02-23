@@ -124,17 +124,20 @@ class Seq2Seq(nn.Module):
         return dec_out
 
 
-def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, maxlent,
-          num_epochs=10,  batch_size=32, device_id=0):
+def train(corpus_path, model_path, num_epochs, batch_size, device):
 
     print("Num epochs:", num_epochs, "Batch size:", batch_size)
+
+    alphabet_path = os.path.join(corpus_path, "alphabet.txt")
+    train_path = os.path.join(corpus_path, 'train.tsv')
+    aud_path = os.path.join(corpus_path, 'clips')
 
     with open(alphabet_path, 'r') as fo:
         alphabet = ['<pad>'] + fo.readlines()
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
-    device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(device) if torch.cuda.is_available() else "cpu")
     #model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
     #model.apply(weights)
 
@@ -151,6 +154,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     val_losses = []
 
     train_dataset = Data(train_path, aud_path, char2ind)
+    print("DATASET:", len(train_dataset))
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
