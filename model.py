@@ -45,7 +45,8 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         x = self.inst_norm(x.unsqueeze(1))
-        x = self.input_layer(x.squeeze())
+        x = torch.transpose(x.squeeze(), 1, 2)
+        x = self.input_layer(x)
         print("input layer", x.shape)
         '''
         outputs=[]
