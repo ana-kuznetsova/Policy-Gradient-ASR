@@ -32,17 +32,19 @@ def nan_to_num(t,mynan=0.):
     return torch.cat([nan_to_num(l).unsqueeze(0) for l in t],0)
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self, batch_size):
         super().__init__()
+        self.layer_norm = nn.LayerNorm(batch_size)
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
-                             num_layers=2,
+                             num_layers=3,
                              dropout=0.3, 
                              bidirectional=True)
         self.drop = nn.Dropout()
         
     def forward(self, x, mask):
+        print("encoder inp:", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -113,12 +115,12 @@ class Decoder(nn.Module):
 
 
 class Seq2Seq(nn.Module):
-    def __init__(self, alphabet_size, batch_size, maxlen):
+    def __init__(self, alphabet_size, batch_size):
         super().__init__()
-        self.encoder = Encoder()
+        self.encoder = Encoder(batch_size)
         self.decoder = Decoder(alphabet_size, 512)
 
-    def forward(self, x, t, fmask, device,):
+    def forward(self, x, t, fmask, device):
         enc_out = self.encoder(x, fmask)
         dec_out = self.decoder(t, enc_out, device=device)
         return dec_out
@@ -138,10 +140,10 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
     device = torch.device("cuda:"+str(device) if torch.cuda.is_available() else "cpu")
-    #model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
-    #model.apply(weights)
+    model = Seq2Seq(alphabet_size=len(char2ind), batch_size=batch_size)
+    model.apply(weights)
 
-    #model = model.to(device)
+    model = model.to(device)
 
     #criterion = customNLLLoss(ignore_index=0)
     #optimizer = optim.Adam(model.parameters(), lr=5e-4)
@@ -154,7 +156,7 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
     val_losses = []
 
     train_dataset = Data(train_path, aud_path, char2ind)
-    print("DATASET:", len(train_dataset))
+
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
@@ -168,7 +170,6 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
-            print("shapes:", x.shape, t.shape)
             
             model_out = model(x, t, fmask, device)
             optimizer.zero_grad()
