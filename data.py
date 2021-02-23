@@ -65,7 +65,6 @@ def extract_feats(data):
     unpadded = []
 
     for inst in data:
-        print(inst["aud"])
         waveform, sample_rate = torchaudio.load(inst["aud"])
         #Calculate MFCC
         mfcc = torchaudio.transforms.MFCC()(waveform)
@@ -94,7 +93,7 @@ def extract_feats(data):
     return torch.stack(padded), torch.stack(masks)
 
 
-def encode_trans(transcrpts, char2ind):
+def encode_trans(data):
     '''
     Encodes true transcription
     '''
@@ -102,9 +101,11 @@ def encode_trans(transcrpts, char2ind):
     unpadded = []
     masks = []
     encoded = []
+    char2ind = data[0]["charmap"]
 
-    for t in transcrpts:
-        res = torch.tensor([char2ind[char] for char in trans])
+    for inst in data:
+        res = torch.tensor([char2ind[char] for char in inst["trans"]])
+        print('ENCODED:', res)
         unpadded.append(res)
         if res.shape[0] > maxlen_t:
             maxlen_t = res.shape[0]
