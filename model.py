@@ -45,7 +45,7 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         print("encoder inp:", x.shape)
-        x = self.inst_norm(x)
+        x = self.inst_norm(x.unsqueeze(1))
         print("inst_norm", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
