@@ -44,9 +44,10 @@ class Encoder(nn.Module):
         self.drop = nn.Dropout()
         
     def forward(self, x, mask):
-        print("encoder inp:", x.shape)
         x = self.inst_norm(x.unsqueeze(1))
-        print("inst_norm", x.shape)
+        x = self.input_layer(x.squeeze)
+        print("input layer", x.shape)
+        '''
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -60,6 +61,7 @@ class Encoder(nn.Module):
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output
+        '''
     
 class Attention(nn.Module):
     def __init__(self):
