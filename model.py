@@ -54,7 +54,7 @@ class Encoder(nn.Module):
         output, (hn, cn) = self.blstm(outputs)
         output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
         return output
-        '''
+
     
 class Attention(nn.Module):
     def __init__(self):
