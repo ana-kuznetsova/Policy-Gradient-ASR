@@ -49,10 +49,10 @@ class Encoder(nn.Module):
         x = F.leaky_relu(self.input_layer(x))
         x = self.drop(x)
         lengths = torch.sum(mask, dim=1)
-        print("lengths", lengths[:5], lengths.shape)
-        outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
-        output, (hn, cn) = self.blstm(outputs)
-        output, _ = pad_packed_sequence(output, total_length=mask.shape[1])
+        x = pack_padded_sequence(x, lengths, enforce_sorted=False)
+        x, (hn, cn) = self.blstm(x)
+        output, _ = pad_packed_sequence(x, total_length=mask.shape[1])
+        print(output.shape)
         return output
 
     
