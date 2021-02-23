@@ -125,6 +125,8 @@ def collate_custom(data):
    
     #{"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
 
+    print("COLLATE", data["aud"])
+
     feats, fmasks = extract_feats(data["aud"])
     transcrpts, tmasks = encode_trans(data["trans"], data["charmap"])
     return {"feat": feats, "fmask":fmasks, "trans":transcrpts, "tmask":tmasks}
