@@ -132,7 +132,7 @@ class Data(data.Dataset):
     def __init__(self, csv_path, aud_path, char2ind):
         self.df = pd.read_csv(csv_path, sep='\t')
         self.char2ind = char2ind
-        self.fnames = [os.join(aud_path, f) for f in self.df['path']]
+        self.fnames = [os.path.join(aud_path, f) for f in self.df['path']]
         self.transcrpts = self.df['sentence']
 
 
