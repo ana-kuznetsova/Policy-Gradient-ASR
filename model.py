@@ -12,7 +12,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 
 from loss import customNLLLoss
-from data import Data, encode_trans
+from data import Data, encode_trans, extract_feats, collate_custom
 from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
 
@@ -135,14 +135,14 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
     device = torch.device("cuda:"+str(device_id) if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
-    model.apply(weights)
+    #model = Seq2Seq(alphabet_size=len(alphabet), batch_size=batch_size, maxlen=maxlen)
+    #model.apply(weights)
 
-    model = model.to(device)
+    #model = model.to(device)
 
-    criterion = customNLLLoss(ignore_index=0)
-    optimizer = optim.Adam(model.parameters(), lr=5e-4)
-    best_model = copy.deepcopy(model.state_dict())
+    #criterion = customNLLLoss(ignore_index=0)
+    #optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    #best_model = copy.deepcopy(model.state_dict())
     
 
     init_val_loss = 9999999
@@ -150,16 +150,17 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
     losses = []
     val_losses = []
 
-    train_dataset = Data(train_path, aud_path, char2ind, [extract_feats, encode_trans], maxlen, maxlent)
+    train_dataset = Data(train_path, aud_path, char2ind)
     print("Start training...")
     for epoch in range(1, num_epochs+1):
         epoch_loss = 0
-        loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, 
+                                                collate_fn=collate_custom)
         num_steps = len(loader)
         step = 0
         for batch in loader:
             step+=1
-            x = batch['aud'].to(device)
+            x = batch['feat'].to(device)
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
