@@ -72,7 +72,6 @@ def extract_feats(data):
         deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
         res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
-        print("MFCC", res.shape)
         unpadded.append(res)
 
         if res.shape[1] > maxlen_feats:

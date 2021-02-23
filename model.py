@@ -45,6 +45,8 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         print("encoder inp:", x.shape)
+        x = self.layer_norm(x)
+        print("layer norm:", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
