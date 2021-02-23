@@ -75,7 +75,7 @@ def extract_feats(data):
         print("MFCC", res.shape)
         unpadded.append(res)
 
-        if res.shape[0] > maxlen_feats:
+        if res.shape[1] > maxlen_feats:
             maxlen_feats = res.shape[0]
 
     padded = []
