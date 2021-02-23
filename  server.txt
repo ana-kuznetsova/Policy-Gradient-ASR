@@ -1,0 +1,1 @@
+main.py --train_path='/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv' --dev_path='/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv' --num_epochs 5 --batch_size 16 --device 0
