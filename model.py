@@ -34,6 +34,7 @@ def nan_to_num(t,mynan=0.):
 class Encoder(nn.Module):
     def __init__(self):
         super().__init__()
+        self.inst_norm = nn.InstanceNorm2d(120)
         self.input_layer = nn.Linear(120, 512)
         self.blstm = nn.LSTM(input_size=512, 
                              hidden_size=256, 
@@ -44,9 +45,8 @@ class Encoder(nn.Module):
         
     def forward(self, x, mask):
         print("encoder inp:", x.shape)
-        lnorm = nn.LayerNorm(x.shape[1:])
-        x = lnorm(x)
-        print("layer norm:", x.shape)
+        x = self.inst_norm(x)
+        print("inst_norm", x.shape)
         outputs=[]
         for i in range(x.shape[2]):
             feature = x[:,:,i]
@@ -142,7 +142,7 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
     device = torch.device("cuda:"+str(device) if torch.cuda.is_available() else "cpu")
-    model = Seq2Seq(alphabet_size=len(char2ind), batch_size=batch_size)
+    model = Seq2Seq(alphabet_size=len(char2ind))
     model.apply(weights)
 
     model = model.to(device)
