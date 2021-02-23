@@ -110,7 +110,7 @@ def encode_trans(data):
             maxlen_t = res.shape[0]
 
     for t in unpadded:
-        print("MAXLENT:", maxlen_t-t.shape[0])
+        print("MAXLENT:", maxlen_t-t.shape[0], t.shape[0])
         res = nn.functional.pad(t, pad=(0, maxlen_t-t.shape[0], 0, 0), mode="constant",value=0)
         encoded.append(res)
         mask = torch.tensor([1 if i>0 else 0 for i in res])
