@@ -46,17 +46,10 @@ class Encoder(nn.Module):
     def forward(self, x, mask):
         x = self.inst_norm(x.unsqueeze(1))
         x = torch.transpose(x.squeeze(), 1, 2)
-        x = self.input_layer(x)
-        print("input layer", x.shape)
+        x = F.leaky_relu(self.input_layer(x))
+        x = self.drop(x)
+        print("inp layer", x.shape)
         '''
-        outputs=[]
-        for i in range(x.shape[2]):
-            feature = x[:,:,i]
-            out = self.input_layer(feature)
-            out = torch.nn.LeakyReLU()(out)
-            out = self.drop(out)
-            outputs.append(out)
-        outputs = torch.stack(outputs)
         lengths = torch.sum(mask, dim=1).detach().cpu()
         outputs = pack_padded_sequence(outputs, lengths, enforce_sorted=False)
         output, (hn, cn) = self.blstm(outputs)
