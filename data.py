@@ -7,20 +7,6 @@ from tqdm import tqdm
 import pandas as pd
 
 
-def find_maxlen(path):
-    distribution = []
-    fnames = os.listdir(path)
-    maxlen = 0
-    for n in tqdm(fnames):
-        waveform, sample_rate = torchaudio.load(os.path.join(path, n))
-        mfcc = torchaudio.transforms.MFCC()(waveform)
-        size = mfcc.shape[2]
-        distribution.append(size)
-        if size > maxlen:
-            maxlen = size
-    fname = n.split('.')[0]
-    np.save(os.path.join(path, fname), np.array(distribution))
-    print("Maxlen:", maxlen, n)
 
 def preproc(corpus_path):
     from string import punctuation
@@ -65,39 +51,95 @@ def preproc(corpus_path):
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
         for char in chars:
             fo.write(char+'\n')
-        
 
-def extract_feats(path, maxlen=1083):
+
+def extract_feats(paths):
     '''
     Reads and processes one file at a time.
     Args:
         path: path to the file
         maxlen: maximum length of the spectrogram for padding
     '''
-    waveform, sample_rate = torchaudio.load(path)
-    #Calculate MFCC
-    mfcc = torchaudio.transforms.MFCC()(waveform)
-    #Calculate delta and double-delta
-    deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
-    ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
-    res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
-    #Normalize rows
-    s = torch.sum(res, dim=1, keepdim=True)
-    norm = torch.div(res, s)
-    mask = torch.ones(1, norm.shape[1])
-    padded_norm = nn.functional.pad(norm, pad=(0, maxlen-norm.shape[1], 0, 0), 
+    maxlen_feats = 0
+    unpadded = []
+
+    for path in paths:
+        waveform, sample_rate = torchaudio.load(path)
+        #Calculate MFCC
+        mfcc = torchaudio.transforms.MFCC()(waveform)
+        #Calculate delta and double-delta
+        deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
+        ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
+        res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
+        unpadded.append(res)
+
+        if res.shape[0] > maxlen_feats:
+            maxlen_feats = res.shape[0]
+
+    padded = []
+    masks = []
+
+    for tens in unpadded:
+        tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
                                           mode="constant",value=0)
-    padded_mask = nn.functional.pad(mask, pad=(0, maxlen-mask.shape[1], 0, 0), 
+
+        mask = torch.ones(1, tens.shape[1])
+        mask = nn.functional.pad(mask, pad=(0, maxlen_feats-mask.shape[1], 0, 0), 
                                           mode="constant",value=0)
-    return padded_norm, padded_mask
+        padded.append(tens)
+        masks.append(mask)
+
+    return torch.stack(padded), torch.stack(masks)
 
 
-def encode_trans(trans, char2ind, maxlen_t=7):
+def encode_trans(transcrpts, char2ind):
     '''
     Encodes true transcription
-    trans: 
     '''
-    res = np.array([char2ind[char] for char in trans])
-    res = np.pad(res, (0, maxlen_t-len(res)), 'constant', constant_values=(0))
-    mask = [1 if i>0 else 0 for i in res]
-    return torch.tensor(res), torch.tensor(mask) 
+    maxlen_t = 0
+    unpadded = []
+    masks = []
+    encoded = []
+
+    for t in transcrpts:
+        res = torch.tensor([char2ind[char] for char in trans])
+        unpadded.append(res)
+        if res.shape[0] > maxlen_t:
+            maxlen_t = res.shape[0]
+
+    for t in unpadded:
+        res = nn.functional.pad(t, pad=(0, maxlen_t-t.shape[0], 0, 0), mode="constant",value=0)
+        encoded.append(res)
+        mask = torch.tensor([1 if i>0 else 0 for i in res])
+        masks.append(mask)
+    
+    return torch.stack(encoded), torch.stack(masks)
+
+
+def collate_custom(data):
+    '''
+    For batch
+    '''
+   
+    #{"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
+
+    feats, fmasks = extract_feats(data["aud"])
+    transcrpts, tmasks = encode_trans(data["trans"], data["charmap"])
+    return {"feat": feats, "fmask":fmasks, "trans":transcrpts, "tmask":tmasks}
+
+class Data(data.Dataset):
+    def __init__(self, csv_path, aud_path, char2ind):
+        self.df = pd.read_csv(csv_path, sep='\t')
+        self.char2ind = char2ind
+        self.fnames = [os.join(aud_path, f) for f in self.df['path']]
+        self.transcrpts = self.df['sentence']
+
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
+        return sample

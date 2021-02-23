@@ -12,34 +12,10 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.nn.functional as F
 
 from loss import customNLLLoss
-from data import extract_feats, encode_trans
+from data import Data, encode_trans
 from CTCdecoder import CTCDecoder, collapse_fn
 from metrics import evaluate, save_predictions
 
-class Data(data.Dataset):
-    def __init__(self, csv_path, aud_path, char2ind, transforms, maxlen, maxlent):
-        self.df = pd.read_csv(csv_path, sep='\t')
-        self.aud_path = aud_path
-        self.char2ind = char2ind
-        self.transforms = transforms
-        self.maxlen = maxlen
-        self.maxlent = maxlent
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        fname = os.path.join(self.aud_path, self.df['path'][idx])
-        transcript = self.df['sentence'][idx].lower()
-
-        feat, fmask = self.transforms[0](fname, self.maxlen)
-        trans, tmask = self.transforms[1](transcript, self.char2ind, self.maxlent)
-        sample = {'aud': nan_to_num(feat), 'trans': trans, 'fmask':fmask, 'tmask':tmask}
-        return sample
-    
 def weights(m):
     '''
     Intialize weights randomly
