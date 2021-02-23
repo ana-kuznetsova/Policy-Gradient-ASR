@@ -80,10 +80,10 @@ def extract_feats(data):
     padded = []
     masks = []
     for tens in unpadded:
+        mask = torch.ones(1, tens.shape[1])
         tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
                                           mode="constant",value=0)
 
-        mask = torch.ones(1, tens.shape[1])
         mask = nn.functional.pad(mask, pad=(0, maxlen_feats-mask.shape[1], 0, 0), 
                                           mode="constant",value=0)
         padded.append(tens)
