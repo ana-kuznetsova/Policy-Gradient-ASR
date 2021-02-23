@@ -76,11 +76,11 @@ def extract_feats(data):
         unpadded.append(res)
 
         if res.shape[1] > maxlen_feats:
-            maxlen_feats = res.shape[0]
+            maxlen_feats = res.shape[1]
 
     padded = []
     masks = []
-
+    print("MAXLEN",maxlen_feats)
     for tens in unpadded:
         tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
                                           mode="constant",value=0)
