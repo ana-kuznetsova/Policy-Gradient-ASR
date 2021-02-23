@@ -72,7 +72,7 @@ def extract_feats(data):
         deltas = torchaudio.transforms.ComputeDeltas()(mfcc)
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
         res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
-        print(res.shape)
+        print("MFCC", res.shape)
         unpadded.append(res)
 
         if res.shape[0] > maxlen_feats:
@@ -84,7 +84,7 @@ def extract_feats(data):
     for tens in unpadded:
         tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
                                           mode="constant",value=0)
-        print(tens.shape)
+        print("Padded:", tens.shape)
 
         mask = torch.ones(1, tens.shape[1])
         mask = nn.functional.pad(mask, pad=(0, maxlen_feats-mask.shape[1], 0, 0), 
