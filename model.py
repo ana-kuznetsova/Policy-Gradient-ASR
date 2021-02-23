@@ -164,6 +164,7 @@ def train(train_path, dev_path, aud_path, alphabet_path, model_path, maxlen, max
             t = batch['trans'].to(device)
             fmask = batch['fmask'].squeeze(1).to(device)
             tmask = batch['tmask'].squeeze(1).to(device)
+            print("shapes:", x.shape, t.shape)
             
             model_out = model(x, t, fmask, device)
             optimizer.zero_grad()

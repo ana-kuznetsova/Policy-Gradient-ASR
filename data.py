@@ -141,5 +141,5 @@ class Data(data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
+        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind}
         return sample
