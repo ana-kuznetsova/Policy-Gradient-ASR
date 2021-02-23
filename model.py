@@ -40,7 +40,8 @@ class Encoder(nn.Module):
                              hidden_size=256, 
                              num_layers=3,
                              dropout=0.3, 
-                             bidirectional=True)
+                             bidirectional=True,
+                             batch_first=True)
         self.drop = nn.Dropout()
         
     def forward(self, x, mask):
@@ -51,9 +52,8 @@ class Encoder(nn.Module):
         lengths = torch.sum(mask, dim=1).detach().cpu()
         x = pack_padded_sequence(x, lengths, enforce_sorted=False, batch_first=True)
         x, (hn, cn) = self.blstm(x)
-        print(x.shape, mask.shape)
-        #output, _ = pad_packed_sequence(x, total_length=mask.shape[1])
-        #print(output.shape)
+        output, _ = pad_packed_sequence(x, total_length=mask.shape[1], batch_first=True)
+        print(output.shape)
         return output
 
     
