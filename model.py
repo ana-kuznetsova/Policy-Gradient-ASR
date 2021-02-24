@@ -53,10 +53,32 @@ class Encoder(nn.Module):
         x = pack_padded_sequence(x, lengths, enforce_sorted=False, batch_first=True)
         x, (hn, cn) = self.blstm(x)
         output, _ = pad_packed_sequence(x, total_length=mask.shape[1], batch_first=True)
-        print(output.shape)
         return output
 
+class Attention(nn.Module):
+    def __init__(self):
+        super().__init__()
     
+    def forward(self):
+        pass
+
+
+class Decoder(nn.Module):
+    def __init__(self, alphabet_size, hidden_size):
+        super().__init__()
+        self.embed_layer = nn.Embedding(alphabet_size, 128)
+        self.lstm = nn.LSTM(input_size=128, 
+                            hidden_size=hidden_size, 
+                            num_layers=1,
+                            dropout=0.3)
+        self.attn = Attention()
+    def forward(self, target_inputs, encoder_outputs, device=None):
+        x = self.embed_layer(target_inputs)
+        print("Embed:", x.shape)
+
+
+
+'''
 class Attention(nn.Module):
     def __init__(self):
         super().__init__()
@@ -79,7 +101,6 @@ class Decoder(nn.Module):
     def __init__(self, output_size, hidden_size):
         super().__init__()
         self.embed_layer = nn.Embedding(output_size, 128)
-        #self.lstm_cell = nn.LSTMCell(128, hidden_size)
         self.lstm = nn.LSTM(input_size=128, 
                             hidden_size=hidden_size, 
                             num_layers=1,
@@ -90,7 +111,7 @@ class Decoder(nn.Module):
 
     def forward(self, target_inputs, encoder_outputs, device=None):
         '''
-        y is a target sentence
+        #y is a target sentence
         '''
       
         dec_hid = encoder_outputs[-1].unsqueeze(0)
@@ -111,7 +132,7 @@ class Decoder(nn.Module):
         dec_outputs = torch.stack(dec_outputs)
         return dec_outputs
 
-
+'''
 class Seq2Seq(nn.Module):
     def __init__(self, alphabet_size):
         super().__init__()
