@@ -70,11 +70,14 @@ class Decoder(nn.Module):
         self.lstm = nn.LSTM(input_size=128, 
                             hidden_size=hidden_size, 
                             num_layers=1,
-                            dropout=0.3)
+                            dropout=0.3, 
+                            batch_first=True)
         self.attn = Attention()
     def forward(self, target_inputs, encoder_outputs, device=None):
         x = self.embed_layer(target_inputs)
         print("Embed:", x.shape)
+        x, (h_n, _) = self.lstm(x)
+        print("LSTM:", x.shape, h_n.shape)
 
 
 
