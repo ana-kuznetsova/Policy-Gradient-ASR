@@ -110,10 +110,6 @@ class Decoder(nn.Module):
         self.drop_lstm = nn.Dropout(p=0.3)
 
     def forward(self, target_inputs, encoder_outputs, device=None):
-        '''
-        #y is a target sentence
-        '''
-      
         dec_hid = encoder_outputs[-1].unsqueeze(0)
 
         encoder_outputs = torch.transpose(encoder_outputs, 0, 1)
