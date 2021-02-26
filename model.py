@@ -196,8 +196,9 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
 
     char2ind = {alphabet[i].replace('\n', ''):i for i in range(len(alphabet))}
 
-    device = torch.device("cuda:"+str(device) if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0")
     model = Seq2Seq(alphabet_size=len(char2ind))
+    model = nn.DataParallel(actor, device_ids=[0, 3])
     model.apply(weights)
 
     model = model.to(device)
