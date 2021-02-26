@@ -76,8 +76,7 @@ class Attention(nn.Module):
                 batch.append(j)
             a_ts = torch.stack(batch)
             attn_scores.append(a_ts)
-        attn_scores = torch.stack(attn_scores)
-        print(attn_scores.shape)
+        print(len(attn_scores))
             
             
 
