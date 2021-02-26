@@ -75,6 +75,7 @@ class Attention(nn.Module):
                 j = temp1[j]/temp2[j]
                 batch.append(j)
             a_ts = torch.stack(batch)
+            del batch
 
             if c_t is None:
                 res = []
