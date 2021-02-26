@@ -64,7 +64,8 @@ class Attention(nn.Module):
         dec_t: decoder timestep
         '''
         for i in range(enc_out.shape[1]):
-            print('t', dec_t.shape, enc_out[:, i,:].shape)
+            res = torch.bmm(dec_t, enc_out[:, i,:])
+            print("BMM:", res.shape)
 
 
 
