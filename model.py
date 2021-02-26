@@ -66,21 +66,17 @@ class Attention(nn.Module):
         c_t = None
         dec_t = dec_t.unsqueeze(-1)
         for i in range(enc_out.shape[1]):
-            enc_s = enc_out[:, i,:].unsqueeze(1)
-            res = torch.bmm(dec_t, enc_s)
-            temp1 = torch.exp(res)
+            temp1 = torch.exp(torch.bmm(dec_t, enc_out[:, i,:].unsqueeze(1)))
             temp2 = torch.sum(temp1, -1)
             batch = []
             for j in range(temp1.shape[0]):
                 j = temp1[j]/temp2[j]
                 batch.append(j)
             a_ts = torch.stack(batch)
-            del enc_s
-            del res
+
             del temp2
             del temp1
             del batch
-
 
             if c_t is None:
                 res = []
