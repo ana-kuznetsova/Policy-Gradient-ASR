@@ -75,6 +75,7 @@ class Attention(nn.Module):
                 j = temp1[j]/temp2[j]
                 batch.append(j)
             a_ts = torch.stack(batch)
+            print(a_ts.shape)
             attn_scores.append(a_ts)
         print(len(attn_scores))
             
