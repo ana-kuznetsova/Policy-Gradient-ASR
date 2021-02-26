@@ -198,7 +198,7 @@ def train(corpus_path, model_path, num_epochs, batch_size, device):
 
     device = torch.device("cuda:0")
     model = Seq2Seq(alphabet_size=len(char2ind))
-    model = nn.DataParallel(actor, device_ids=[0, 3])
+    model = nn.DataParallel(model, device_ids=[0, 3])
     model.apply(weights)
 
     model = model.to(device)
