@@ -63,7 +63,7 @@ class Attention(nn.Module):
         '''
         dec_t: decoder timestep
         '''
-        attn_scores = []
+        c_t = None
         dec_t = dec_t.unsqueeze(-1)
         for i in range(enc_out.shape[1]):
             enc_s = enc_out[:, i,:].unsqueeze(1)
@@ -75,9 +75,11 @@ class Attention(nn.Module):
                 j = temp1[j]/temp2[j]
                 batch.append(j)
             a_ts = torch.stack(batch)
-            attn_scores.append(a_ts)
-        print(len(attn_scores))
-            
+            if c_t is None:
+                c_t = a_ts*enc_out[:, i,:]
+            else:
+                c_t+=a_ts*enc_out[:, i,:]
+            print("CT", c_t.shape)
             
 
 
