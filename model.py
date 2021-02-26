@@ -75,17 +75,24 @@ class Attention(nn.Module):
                 j = temp1[j]/temp2[j]
                 batch.append(j)
             a_ts = torch.stack(batch)
+            del enc_s
+            del res
+            del temp2
+            del temp1
             del batch
+
 
             if c_t is None:
                 res = []
                 for b in range(a_ts.shape[0]):
                     res.append(a_ts[b,:,:]*enc_out[b, i,:].unsqueeze(0))
                 c_t = torch.stack(res)
+                del res
             else:
                 res = []
                 for b in range(a_ts.shape[0]):
                     res.append(a_ts[b,:,:]*enc_out[b, i,:].unsqueeze(0))
+                del res
                 c_t += torch.stack(res)
         c_t = torch.sum(c_t, 1)
         print("CT", c_t.shape)
