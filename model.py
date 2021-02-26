@@ -67,7 +67,9 @@ class Attention(nn.Module):
             dec_t = dec_t.unsqueeze(-1)
             enc_s = enc_out[:, i,:].unsqueeze(1)
             res = torch.bmm(dec_t, enc_s)
-            print("BMM:", res.shape)
+            temp1 = torch.exp(res)
+            temp2 = torch.sum(temp1, -1)
+            print("temps:", temp1.shape, temp2.shape)
 
 
 
