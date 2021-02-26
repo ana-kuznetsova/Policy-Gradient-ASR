@@ -63,7 +63,8 @@ class Attention(nn.Module):
         '''
         dec_t: decoder timestep
         '''
-        for i in range(enc_out.shape[1])
+        for i in range(enc_out.shape[1]):
+            pass
 
 
 
