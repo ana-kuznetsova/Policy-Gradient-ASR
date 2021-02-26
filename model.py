@@ -81,7 +81,7 @@ class Decoder(nn.Module):
     def forward(self, target_inputs, encoder_outputs, device=None):
         x = self.embed_layer(target_inputs)
         dec_out, (h_n, _) = self.lstm(x)
-        print(dec_out.shape)
+        print(dec_out.shape, encoder_outputs.shape)
 
         for t in range(dec_out.shape[1]):
             #print(dec_out[:,t,:].shape)
