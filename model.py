@@ -91,7 +91,7 @@ class Attention(nn.Module):
                 c_t += torch.stack(res)
                 del res
         c_t = torch.sum(c_t, 1)
-        print("CT", c_t.shape)
+        return c_t
             
 
 
@@ -109,10 +109,13 @@ class Decoder(nn.Module):
     def forward(self, target_inputs, encoder_outputs, device=None):
         x = self.embed_layer(target_inputs)
         dec_out, (h_n, _) = self.lstm(x)
-    
+
+        preds = []       
         for t in range(dec_out.shape[1]):
             t = dec_out[:, t,:]
-            x = self.attn(t, encoder_outputs)
+            c_t = self.attn(t, encoder_outputs)
+            preds.append(torch.concat((t, c_t)))
+        print(torch.stack(preds).shape)
         
 
 
