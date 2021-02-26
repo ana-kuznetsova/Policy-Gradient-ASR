@@ -66,8 +66,8 @@ class Attention(nn.Module):
         attn_scores = []
         for i in range(enc_out.shape[1]):
             dec_t = dec_t.unsqueeze(-1)
-            enc_s = enc_out[:, i,:]
-            print(dec_t.shape, enc_s.shape)
+            enc_s = enc_out[:, i,:].unsqueeze(1)
+            print("BMM", dec_t.shape, enc_s.shape)
             res = torch.bmm(dec_t, enc_s)
             temp1 = torch.exp(res)
             temp2 = torch.sum(temp1, -1)
@@ -97,8 +97,7 @@ class Decoder(nn.Module):
     def forward(self, target_inputs, encoder_outputs, device=None):
         x = self.embed_layer(target_inputs)
         dec_out, (h_n, _) = self.lstm(x)
-        print(dec_out.shape, encoder_outputs.shape)
-
+    
         for t in range(dec_out.shape[1]):
             t = dec_out[:, t,:]
             x = self.attn(t, encoder_outputs)
