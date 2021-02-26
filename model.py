@@ -63,7 +63,10 @@ class Attention(nn.Module):
         '''
         dec_t: decoder timestep
         '''
-        print(dec_t.shape, enc_out.shape)
+        dec_t = dec_t.unsqueeze(1)
+        enc_out = torch.transpose(enc_out, 1, 2)
+        score = torch.bmm(dec_t, enc_out)
+        print("Score:", score.shape)
             
 
 
