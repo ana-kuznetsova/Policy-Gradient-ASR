@@ -70,6 +70,8 @@ class Attention(nn.Module):
             temp1 = torch.exp(res)
             temp2 = torch.sum(temp1, -1)
             print("temps:", temp1.shape, temp2.shape)
+            res = temp1/temp2
+            print(res[:, :3, :])
 
 
 
