@@ -70,8 +70,12 @@ class Attention(nn.Module):
             temp1 = torch.exp(res)
             temp2 = torch.sum(temp1, -1)
             print("temps:", temp1.shape, temp2.shape)
-            for batch in range(temp1.shape[0]):
-                print(temp1[batch]/temp2[batch])
+            batch = []
+            for j in range(temp1.shape[0]):
+                j = temp1[j]/temp2[j]
+                batch.append(j)
+            batch = torch.stack(batch)
+            print(batch.shape)
             
 
 
