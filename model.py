@@ -113,7 +113,8 @@ class Decoder(nn.Module):
         preds = []       
         for t in range(dec_out.shape[1]):
             c_t = self.attn(dec_out[:, t,:], encoder_outputs)
-            print(torch.cat((t, c_t), 0).shape)
+            temp = torch.cat((t, c_t), 0)
+            print(temp.shape)
             preds.append(torch.cat((t, c_t), 0))
         print(torch.stack(preds).shape)
         
