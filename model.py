@@ -77,7 +77,12 @@ class Attention(nn.Module):
             a_ts = torch.stack(batch)
             print(enc_out[:, i,:].shape, a_ts.shape)
             if c_t is None:
-                c_t = a_ts*enc_out[:, i,:]
+                res = []
+                for b in range(a_ts.shape[0]):
+                    res.append(a_ts[b,:,:]*enc_out[b:, i,:])
+                print(torch.stack(res).shape)
+
+                #c_t = a_ts*enc_out[:, i,:]
             else:
                 c_t+=a_ts*enc_out[:, i,:]
             print("CT", c_t.shape)
