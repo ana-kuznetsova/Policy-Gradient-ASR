@@ -81,7 +81,8 @@ class Decoder(nn.Module):
         x = self.embed_layer(target_inputs)
         print("Embed:", x.shape)
         dec_out, (h_n, _) = self.lstm(x)
-        for t in dec_out.shape()[1]:
+
+        for t in dec_out.shape[1]:
             print(dec_out[:,t,:].shape)
         
 
