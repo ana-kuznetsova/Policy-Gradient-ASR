@@ -59,11 +59,11 @@ class Attention(nn.Module):
     def __init__(self):
         super().__init__()
     
-    def forward(self, enc_out, dec_out):
+    def forward(self, dec_t, enc_out):
         '''
         dec_t: decoder timestep
         '''
-        #for t in range(dec_out.shape[1]):
+        for i in range(enc_out.shape[1])
 
 
 
@@ -79,11 +79,12 @@ class Decoder(nn.Module):
         self.attn = Attention()
     def forward(self, target_inputs, encoder_outputs, device=None):
         x = self.embed_layer(target_inputs)
-        print("Embed:", x.shape)
         dec_out, (h_n, _) = self.lstm(x)
+        print(dec_out.shape)
 
         for t in range(dec_out.shape[1]):
-            print(dec_out[:,t,:].shape)
+            #print(dec_out[:,t,:].shape)
+            pass
         
 
 
