@@ -92,8 +92,8 @@ class Attention(nn.Module):
                 res = []
                 for b in range(a_ts.shape[0]):
                     res.append(a_ts[b,:,:]*enc_out[b, i,:].unsqueeze(0))
-                del res
                 c_t += torch.stack(res)
+                del res
         c_t = torch.sum(c_t, 1)
         print("CT", c_t.shape)
             
