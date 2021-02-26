@@ -66,7 +66,7 @@ class Attention(nn.Module):
         attn_scores = []
         for i in range(enc_out.shape[1]):
             dec_t = dec_t.unsqueeze(-1)
-            enc_s = enc_out[:, i,:].unsqueeze(1)
+            enc_s = enc_out[:, i,:]
             print(dec_t.shape, enc_s.shape)
             res = torch.bmm(dec_t, enc_s)
             temp1 = torch.exp(res)
