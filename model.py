@@ -84,6 +84,7 @@ class Decoder(nn.Module):
         print(dec_out.shape, encoder_outputs.shape)
 
         for t in range(dec_out.shape[1]):
+            t = dec_out[:, t,:]
             x = self.attn(t, encoder_outputs)
         
 
