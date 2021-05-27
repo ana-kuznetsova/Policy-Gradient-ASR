@@ -7,25 +7,19 @@ import torch.utils.data as data
 from tqdm import tqdm
 import pandas as pd
 
+from cvutils import Validator, Alphabet
 
-
-def preproc(corpus_path):
-    from string import punctuation
-    
+def preproc_text(corpus_path, lang):
     train = pd.read_csv(os.path.join(corpus_path, 'train.tsv'), sep='\t')
     dev = pd.read_csv(os.path.join(corpus_path,'dev.tsv'), sep='\t')
     test = pd.read_csv(os.path.join(corpus_path,'test.tsv'), sep='\t')
 
-    punctuation = punctuation + '«»½“”…'
-    
-    ## Remove punct
-    train_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
-                   for sent in train['sentence']]
-    dev_sents =  [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
-                   for sent in dev['sentence']]
-    
-    test_sents = [''.join([char for char in sent.lower() if char not in punctuation] + ["."])\
-                   for sent in test['sentence']]
+    val = Validator(lang)
+
+    train_sents = [val.validate(s) for s in train['sentence']]
+    dev_sents = [val.validate(s) for s in dev['sentence']]
+    test_sents = [val.validate(s) for s in test['sentence']]
+
     
     ##Write modified df
     train['sentence'] = train_sents
@@ -38,17 +32,10 @@ def preproc(corpus_path):
     test.to_csv(os.path.join(corpus_path, 'test.tsv'), sep='\t')
     
     #Make alphabet
-    chars = []
-    sents = train_sents + dev_sents + test_sents
-    for sent in sents:
-        for char in sent:
-            if char not in chars:
-                chars.append(char)
+    
+    alph = Alphabet(lang)
+    chars = alph.get_alphabet()
 
-    chars = sorted(chars)
-    temp = chars[0]
-    chars[0] = chars[1]
-    chars[1] = temp
     with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
         for char in chars:
             fo.write(char+'\n')
