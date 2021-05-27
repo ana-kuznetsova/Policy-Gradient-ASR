@@ -88,16 +88,18 @@ def encode_trans(batch, char2ind):
     return torch.stack(padded), torch.tensor(lens)
 
 
-def collate_custom(batch, char2ind):
+def collate_custom(batch):
+    char2ind = batch["char2ind"]
     feats, alens = extract_feats(batch)
     transcrpts, tlens = encode_trans(batch, char2ind)
     return {"feat": feats, "alens":alens, "trans":transcrpts, "tlens":tlens}
 
 class Data(data.Dataset):
-    def __init__(self, csv_path, aud_path):
+    def __init__(self, csv_path, aud_path, char2ind):
         self.df = pd.read_csv(csv_path, sep='\t')
         self.fnames = [os.path.join(aud_path, f) for f in self.df['path']]
         self.transcrpts = self.df['sentence']
+        self.char2ind = char2ind
 
 
     def __len__(self):
@@ -106,11 +108,16 @@ class Data(data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx]}
+        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "char2ind":self.char2ind}
         return sample
 
 corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu'
 char2ind = preproc_text(corpus_path, 'eu')
 
 dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'))
-print(dataset_train)
+loader_train = data.DataLoader(dataset_train, batch_size=5, 
+                               shuffle=True, collate_fn=collate_custom)
+
+print(len(loader_train))
+for batch in loader_train:
+    print(batch)
