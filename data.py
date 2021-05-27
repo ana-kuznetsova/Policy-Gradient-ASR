@@ -88,9 +88,9 @@ def encode_trans(batch, char2ind):
 
 
 def collate_custom(batch, char2ind):
-    feats, fmasks = extract_feats(batch)
-    transcrpts, tmasks = encode_trans(batch, char2ind)
-    return {"feat": feats, "fmask":fmasks, "trans":transcrpts, "tmask":tmasks}
+    feats, alens = extract_feats(batch)
+    transcrpts, tlens = encode_trans(batch, char2ind)
+    return {"feat": feats, "alens":alens, "trans":transcrpts, "tlens":tlens}
 
 class Data(data.Dataset):
     def __init__(self, csv_path, aud_path):
