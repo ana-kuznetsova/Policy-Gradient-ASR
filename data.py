@@ -112,5 +112,5 @@ class Data(data.Dataset):
 corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu'
 char2ind = preproc_text(corpus_path, 'eu')
 
-dataset = Data(corpus_path, os.path.join(corpus_path, 'clips'))
-print(dataset)
+dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'))
+print(dataset_train)
