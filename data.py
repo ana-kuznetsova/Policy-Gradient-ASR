@@ -120,4 +120,4 @@ loader_train = data.DataLoader(dataset_train, batch_size=5,
 
 print(len(loader_train))
 for batch in loader_train:
-    print(batch)
+    print(batch.keys())
