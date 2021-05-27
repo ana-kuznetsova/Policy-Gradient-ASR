@@ -111,3 +111,4 @@ class Data(data.Dataset):
 
 corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu'
 char2ind = preproc_text(corpus_path, 'eu')
+print(char2ind)
