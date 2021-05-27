@@ -114,7 +114,7 @@ class Data(data.Dataset):
 corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu'
 char2ind = preproc_text(corpus_path, 'eu')
 
-dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'))
+dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'), char2ind)
 loader_train = data.DataLoader(dataset_train, batch_size=5, 
                                shuffle=True, collate_fn=collate_custom)
 
