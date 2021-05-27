@@ -22,6 +22,6 @@ if __name__ == "__main__":
    parser.add_argument('--num_epochs', nargs='?', type=int, default=10, help="Number of epochs")
    parser.add_argument('--batch_size', nargs='?', type=int, default=32, help='Batch size')
    parser.add_argument('--mode', type=str, help="Select mode: train, predict", required=True)
-   parser.add_argument('--device', type=int, help="GPU id")
+   parser.add_argument('--device', type=int, help="GPU id", required=True)
    args = parser.parse_args()
    main(args)

@@ -147,10 +147,8 @@ class Decoder(nn.Module):
                             hidden_size=hidden_size, 
                             num_layers=1,
                             dropout=0.3)
-        self.output = nn.Linear(2* hidden_size, output_size)
-        self.attention = Attention()
-        self.drop_lstm = nn.Dropout(p=0.3)
-
+        self.output = nn.Linear(hidden_size, output_size)
+    
     def forward(self, target_inputs, encoder_outputs, device=None):
         dec_hid = encoder_outputs[-1].unsqueeze(0)
 
@@ -161,13 +159,13 @@ class Decoder(nn.Module):
         for inp in torch.transpose(target_inputs, 0, 1):
             embedded = self.embed_layer(inp)
             dec_out, (dec_hid, _) = self.lstm(embedded.unsqueeze(0), (dec_hid, c_i))
-            context = self.attention(encoder_outputs, dec_out.squeeze(0), device)
-            combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
-            output_i = self.output(combined_input)
-            output_i = F.log_softmax(output_i, dim=1)
+            #combined_input = torch.cat([dec_hid.squeeze(0), context], 1)
+            output_i = self.output(dec_out)
+            output_i = F.log_softmax(output_i, dim=1).squeeze(0)
             dec_outputs.append(output_i)
 
         dec_outputs = torch.stack(dec_outputs)
+        #print(dec_outputs.shape)
         return dec_outputs
 
 '''
