@@ -89,7 +89,8 @@ def encode_trans(batch, char2ind):
 
 
 def collate_custom(batch):
-    char2ind = batch["char2ind"]
+    #char2ind = batch["char2ind"]
+    print(batch)
     feats, alens = extract_feats(batch)
     transcrpts, tlens = encode_trans(batch, char2ind)
     return {"feat": feats, "alens":alens, "trans":transcrpts, "tlens":tlens}
