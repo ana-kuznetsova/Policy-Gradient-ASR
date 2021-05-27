@@ -31,14 +31,15 @@ def preproc_text(corpus_path, lang):
     test['sentence'] = test_sents
     test.to_csv(os.path.join(corpus_path, 'test.tsv'), sep='\t')
     
-    #Make alphabet
+    #Make char2ind
     
     alph = Alphabet(lang)
     chars = alph.get_alphabet()
 
-    with open(os.path.join(corpus_path, "alphabet.txt"), 'w') as fo:
-        for char in chars:
-            fo.write(char+'\n')
+    char2ind = {char:i for i, char in enumerate(chars)}
+    #char2ind["<sos/>"] = len(char2ind) + 1
+    #char2ind["<eos/>"] = len(char2ind) + 2
+    return char2ind
 
 
 def extract_feats(batch):
@@ -107,3 +108,6 @@ class Data(data.Dataset):
             idx = idx.tolist()
         sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx]}
         return sample
+
+corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu'
+char2ind = preproc_text(corpus_path, 'eu')
