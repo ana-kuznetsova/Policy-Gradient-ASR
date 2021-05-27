@@ -41,17 +41,12 @@ def preproc_text(corpus_path, lang):
             fo.write(char+'\n')
 
 
-def extract_feats(data):
-    '''
-    Reads and processes one file at a time.
-    Args:
-        path: path to the file
-        maxlen: maximum length of the spectrogram for padding
-    '''
-    maxlen_feats = 0
+def extract_feats(batch):
+    lens = []
     unpadded = []
+    maxlen_feats = 0
 
-    for inst in data:
+    for inst in batch:
         waveform, sample_rate = torchaudio.load(inst["aud"])
         #Calculate MFCC
         mfcc = torchaudio.transforms.MFCC()(waveform)
@@ -60,65 +55,46 @@ def extract_feats(data):
         ddeltas = torchaudio.transforms.ComputeDeltas()(deltas)
         res = torch.cat((mfcc, deltas, ddeltas), dim=1).squeeze(0)
         unpadded.append(res)
-
-        if res.shape[1] > maxlen_feats:
-            maxlen_feats = res.shape[1]
+        lens.append(res.shape[1])
+        maxlen_feats = max(maxlen_feats, res.shape[1])
 
     padded = []
-    masks = []
-    for tens in unpadded:
-        mask = torch.ones(1, tens.shape[1])
-        tens = nn.functional.pad(tens, pad=(0, maxlen_feats-tens.shape[1], 0, 0), 
+
+    for i, x in enumerate(unpadded):
+
+        x = nn.functional.pad(x, pad=(0, maxlen_feats-lens[i], 0, 0), 
                                           mode="constant",value=0)
 
-        mask = nn.functional.pad(mask, pad=(0, maxlen_feats-mask.shape[1], 0, 0), 
-                                          mode="constant",value=0)
-        padded.append(tens)
-        masks.append(mask)
-
-    return torch.stack(padded), torch.stack(masks)
+        padded.append(x)
+    return torch.stack(padded), torch.tensor(lens)
 
 
-def encode_trans(data):
-    '''
-    Encodes true transcription
-    '''
+def encode_trans(batch, char2ind):
     maxlen_t = 0
     unpadded = []
-    masks = []
-    encoded = []
-    char2ind = data[0]["charmap"]
+    padded = []
+    lens = []
 
-    for inst in data:
-        res = torch.tensor([char2ind[char] for char in inst["trans"]])
+    for t in batch:
+        res = torch.tensor([char2ind[char] for char in t["trans"]])
         unpadded.append(res)
-        if res.shape[0] > maxlen_t:
-            maxlen_t = res.shape[0]
+        maxlen_t = max(maxlen_t, res.shape[0])
+        lens.append(res.shape[0])
 
     for t in unpadded:
         res = nn.functional.pad(t, pad=(0, maxlen_t-t.shape[0]), mode="constant",value=0)
-        encoded.append(res)
-        mask = torch.tensor([1 if i>0 else 0 for i in res])
-        masks.append(mask)
-    
-    return torch.stack(encoded), torch.stack(masks)
+        padded.append(res)
+    return torch.stack(padded), torch.tensor(lens)
 
 
-def collate_custom(data):
-    '''
-    For batch
-    '''
-   
-    #{"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind)}
-
-    feats, fmasks = extract_feats(data)
-    transcrpts, tmasks = encode_trans(data)
+def collate_custom(batch, char2ind):
+    feats, fmasks = extract_feats(batch)
+    transcrpts, tmasks = encode_trans(batch, char2ind)
     return {"feat": feats, "fmask":fmasks, "trans":transcrpts, "tmask":tmasks}
 
 class Data(data.Dataset):
-    def __init__(self, csv_path, aud_path, char2ind):
+    def __init__(self, csv_path, aud_path):
         self.df = pd.read_csv(csv_path, sep='\t')
-        self.char2ind = char2ind
         self.fnames = [os.path.join(aud_path, f) for f in self.df['path']]
         self.transcrpts = self.df['sentence']
 
@@ -129,5 +105,5 @@ class Data(data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "charmap":self.char2ind}
+        sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx]}
         return sample
