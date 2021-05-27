@@ -70,13 +70,14 @@ def extract_feats(batch):
     return torch.stack(padded), torch.tensor(lens)
 
 
-def encode_trans(batch, char2ind):
+def encode_trans(batch):
     maxlen_t = 0
     unpadded = []
     padded = []
     lens = []
 
     for t in batch:
+        char2ind = t['char2ind']
         res = torch.tensor([char2ind[char] for char in t["trans"]])
         unpadded.append(res)
         maxlen_t = max(maxlen_t, res.shape[0])
@@ -89,10 +90,8 @@ def encode_trans(batch, char2ind):
 
 
 def collate_custom(batch):
-    #char2ind = batch["char2ind"]
-    print(batch)
     feats, alens = extract_feats(batch)
-    transcrpts, tlens = encode_trans(batch, char2ind)
+    transcrpts, tlens = encode_trans(batch)
     return {"feat": feats, "alens":alens, "trans":transcrpts, "tlens":tlens}
 
 class Data(data.Dataset):
