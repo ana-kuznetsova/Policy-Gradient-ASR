@@ -21,19 +21,16 @@ class Encoder(nn.Module):
         self.blstm1 = nn.LSTM(input_size=inp_size, 
                              hidden_size=hid_size, 
                              num_layers=1,
-                             dropout=0.3, 
                              bidirectional=True,
                              batch_first=True)
         self.blstm2 = nn.LSTM(input_size=inp_size, 
                              hidden_size=hid_size//4, 
                              num_layers=1,
-                             dropout=0.3, 
                              bidirectional=True,
                              batch_first=True)
         self.blstm3 = nn.LSTM(input_size=inp_size, 
                              hidden_size=hid_size//8, 
                              num_layers=1,
-                             dropout=0.3, 
                              bidirectional=True,
                              batch_first=True)
         
@@ -45,6 +42,7 @@ class Encoder(nn.Module):
         print("Inp L", x.shape)
         x = pack_padded_sequence(x, lens, enforce_sorted=False, batch_first=True)
         x, _ = self.blstm1(x)
+        print("lstm1", x.shape)
         x, _ = self.blstm2(x)
         x, _ = self.blstm3(x)
         output, _ = pad_packed_sequence(x, batch_first=True)
