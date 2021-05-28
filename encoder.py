@@ -40,7 +40,9 @@ class Encoder(nn.Module):
     def forward(self, x, lens):
         x = torch.transpose(x, 1, -1)
         x = self.layer_norm(x)
+        print("Lnorm:", x.shape)
         x = F.leaky_relu(self.input_layer(x))
+        print("Inp L", x.shape)
         x = pack_padded_sequence(x, lens, enforce_sorted=False, batch_first=True)
         x, _ = self.blstm1(x)
         x, _ = self.blstm2(x)
