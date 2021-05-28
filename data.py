@@ -110,14 +110,3 @@ class Data(data.Dataset):
             idx = idx.tolist()
         sample = {"aud": self.fnames[idx], "trans":self.transcrpts[idx], "char2ind":self.char2ind}
         return sample
-
-corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-6.1-2020-12-11/eu'
-char2ind = preproc_text(corpus_path, 'eu')
-
-dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'), char2ind)
-loader_train = data.DataLoader(dataset_train, batch_size=5, 
-                               shuffle=True, collate_fn=collate_custom)
-
-print(len(loader_train))
-for batch in loader_train:
-    print(batch['feat'].shape)
