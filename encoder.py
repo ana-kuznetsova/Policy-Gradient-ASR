@@ -23,13 +23,13 @@ class Encoder(nn.Module):
                              bidirectional=True,
                              batch_first=True)
         self.blstm2 = nn.LSTM(input_size=inp_size, 
-                             hidden_size=hid_size//2, 
+                             hidden_size=hid_size//4, 
                              num_layers=1,
                              dropout=0.3, 
                              bidirectional=True,
                              batch_first=True)
         self.blstm3 = nn.LSTM(input_size=inp_size, 
-                             hidden_size=hid_size//4, 
+                             hidden_size=hid_size//8, 
                              num_layers=1,
                              dropout=0.3, 
                              bidirectional=True,
