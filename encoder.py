@@ -38,7 +38,7 @@ class Encoder(nn.Module):
                              batch_first=True)
         
     def forward(self, x, lens):
-        x = torch.transpose(1, -1)
+        x = torch.transpose(x, 1, -1)
         x = self.layer_norm(x)
         x = F.leaky_relu(self.input_layer(x))
         x = pack_padded_sequence(x, lens, enforce_sorted=False, batch_first=True)
