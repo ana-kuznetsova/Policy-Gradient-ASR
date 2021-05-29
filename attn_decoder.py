@@ -57,7 +57,6 @@ class Decoder(nn.Module):
         batch_size=key.shape[1]
         if(train):
             text=torch.transpose(text,0,1)
-            print(text.shape)
             max_len=text.shape[1]
             embeddings=self.embedding(text)
         else:
@@ -65,7 +64,7 @@ class Decoder(nn.Module):
             predictions = []
 
         hidden_states = [None, None]
-        prediction = torch.zeros(batch_size,1).to(device)
+        prediction = torch.zeros(batch_size, 1).to(device)
         context=values[0,:,:]
         for i in range(max_len):
             if(train):
@@ -75,7 +74,8 @@ class Decoder(nn.Module):
                 else:
                     embed = embeddings[:,i,:]
             else:
-                embed = self.embedding(prediction.argmax(dim=-1))     
+                embed = self.embedding(prediction.argmax(dim=-1))    
+            print("embedding:", embed.shape) 
             inp = torch.cat([embed,context], dim=1)
             hidden_states[0] = self.lstm1(inp,hidden_states[0])
             
