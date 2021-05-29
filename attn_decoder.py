@@ -46,7 +46,7 @@ class Decoder(nn.Module):
             self.attention = Attention()
         self.mos = nn.Linear(key_size+value_size,alphabet_size)
 
-    def forward(self, key, values, lens, text=None, train=True):
+    def forward(self, key, values, lens, text, device, train=True):
         '''
         :param key :(T,N,key_size) Output of the Encoder Key projection layer
         :param values: (T,N,value_size) Output of the Encoder Value projection layer
@@ -110,5 +110,5 @@ for batch in loader_train:
     xlens = batch['alens']
     y = batch['trans'].to(device)
     keys, values = encoder(x, xlens)
-    out = decoder(keys, values, xlens, y)
+    out = decoder(keys, values, xlens, y, device)
     print("dec out:", out.shape)
