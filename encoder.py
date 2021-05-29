@@ -17,7 +17,9 @@ from data import preproc_text, Data, collate_custom
 class pBLSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(pBLSTM, self).__init__()
-        self.blstm = nn.LSTM(input_size=input_dim,hidden_size=hidden_dim,num_layers=1,bidirectional=True)
+        self.blstm = nn.LSTM(input_size=input_dim,
+                            hidden_size=hidden_dim,
+                            num_layers=1, bidirectional=True)
     def forward(self,x):
         return self.blstm(x)
 
@@ -25,7 +27,8 @@ class pBLSTM(nn.Module):
 class Encoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, value_size=128,key_size=128):
         super(Encoder, self).__init__()
-        self.lstm = nn.LSTM(input_size=input_dim,hidden_size=hidden_dim,num_layers=1,bidirectional=True)
+        self.input_layer = nn.Linear(input_dim, 2*hidden_dim)
+        self.relu = nn.LeakyReLU()
         self.pBLSTM1= pBLSTM(2*hidden_dim, hidden_dim)
         self.pBLSTM2= pBLSTM(2*hidden_dim, hidden_dim)
         self.pBLSTM3= pBLSTM(2*hidden_dim, hidden_dim)
@@ -33,10 +36,9 @@ class Encoder(nn.Module):
         self.value_network = nn.Linear(hidden_dim*2, key_size)
 
     def forward(self, x, lens):
-        rnn_inp = pack_padded_sequence(x, lengths=lens, enforce_sorted=False)
-        outputs, _ = self.lstm(rnn_inp)
-        linear_input, _ = pad_packed_sequence(outputs)
-        
+        linear_input = self.input_layer(x)
+        linear_input = self.relu(x)
+        print("lin input:", linear_input.shape)
         for i in range(3):
             if linear_input.shape[0]%2!=0:
                 linear_input = linear_input[:-1,:,:]
@@ -45,7 +47,7 @@ class Encoder(nn.Module):
             outputs = torch.mean(outputs, 2)
             outputs = torch.transpose(outputs,0,1)
             lens=lens//2
-            rnn_inp = utils.rnn.pack_padded_sequence(outputs, lengths=lens, enforce_sorted=False)
+            rnn_inp = pack_padded_sequence(outputs, lengths=lens, enforce_sorted=False)
             if i==0:
                 outputs, _ = self.pBLSTM1(rnn_inp)
             elif i==1:
