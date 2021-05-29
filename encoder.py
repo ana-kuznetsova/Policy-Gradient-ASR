@@ -75,6 +75,4 @@ encoder.to(device)
 for batch in loader_train:
     x = batch["feat"].to(device)
     xlens = batch['alens']
-    print("In shape:", x.shape)
     out = encoder(x, xlens)
-    print("Out_shape:", out.shape)
