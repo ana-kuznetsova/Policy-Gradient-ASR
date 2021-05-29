@@ -72,10 +72,13 @@ class Decoder(nn.Module):
                 if np.random.random_sample() > 0.6:
                     prediction = Gumbel(prediction.to('cpu'), torch.tensor([0.4])).sample().to(device)
                     embed = self.embedding(prediction.argmax(dim=-1))
+                    print("embed1", embed.shape)
                 else:
                     embed = embeddings[:,i,:]
+                    print("embed2:", embed.shape)
             else:
                 embed = self.embedding(prediction.argmax(dim=-1))   
+                print("embed2:", embed.shape)
 
             print(embed.shape, context.shape) 
             inp = torch.cat([embed,context], dim=1)
