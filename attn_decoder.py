@@ -57,7 +57,6 @@ class Decoder(nn.Module):
         batch_size=key.shape[1]
         if(train):
             text=torch.transpose(text,0,1)
-            print(text)
             max_len=text.shape[1]
             embeddings=self.embedding(text)
         else:
@@ -111,6 +110,7 @@ for batch in loader_train:
     x = batch["feat"].to(device)
     xlens = batch['alens']
     y = batch['trans'].to(device)
+    print("text", y.shape)
     keys, values = encoder(x, xlens)
     out = decoder(keys, values, xlens, y, device)
     print("dec out:", out.shape)
