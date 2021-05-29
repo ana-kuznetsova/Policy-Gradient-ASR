@@ -1,17 +1,8 @@
-import os
-import pandas as pd
-import copy
 import torch
 
 import torch.nn as nn
-import torch.optim as optim
 import torch.utils.data as data
-from torch import utils
-import torchaudio
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-import torch.nn.functional as F
-
-from data import preproc_text, Data, collate_custom
 
 
 class pBLSTM(nn.Module):
@@ -60,21 +51,3 @@ class Encoder(nn.Module):
         values = self.value_network(linear_input)
 
         return keys, values
-
-corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-6.1-2020-12-11/eu'
-char2ind = preproc_text(corpus_path, 'eu')
-
-dataset_train = Data(os.path.join(corpus_path, 'train.tsv'), os.path.join(corpus_path, 'clips'), char2ind)
-loader_train = data.DataLoader(dataset_train, batch_size=5, 
-                               shuffle=True, collate_fn=collate_custom)
-
-device ="cuda:1"
-
-encoder = Encoder(120, 256)
-encoder.to(device)
-
-for batch in loader_train:
-    x = batch["feat"].to(device)
-    xlens = batch['alens']
-    keys, values = encoder(x, xlens)
-    print(keys.shape, values.shape)
