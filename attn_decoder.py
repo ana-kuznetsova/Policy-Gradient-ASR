@@ -72,16 +72,11 @@ class Decoder(nn.Module):
                 if np.random.random_sample() > 0.6:
                     prediction = Gumbel(prediction.to('cpu'), torch.tensor([0.4])).sample().to(device)
                     embed = self.embedding(prediction.argmax(dim=-1))
-                    print("embed1", embed.shape)
                 else:
-                    print("embeddings:", embeddings.shape)
                     embed = embeddings[i, :,:]
-                    print("embed2:", embed.shape)
             else:
                 embed = self.embedding(prediction.argmax(dim=-1))   
-                print("embed2:", embed.shape)
 
-            print(embed.shape, context.shape) 
             inp = torch.cat([embed,context], dim=1)
             hidden_states[0] = self.lstm1(inp,hidden_states[0])
             
@@ -113,6 +108,7 @@ decoder = Decoder(len(char2ind), 512)
 encoder.to(device)
 decoder.to(device)
 
+print("Alphabet:", len(char2ind))
 for batch in loader_train:
     x = batch["feat"].to(device)
     xlens = batch['alens']
