@@ -75,7 +75,9 @@ class Decoder(nn.Module):
                 else:
                     embed = embeddings[:,i,:]
             else:
-                embed = self.embedding(prediction.argmax(dim=-1))    
+                embed = self.embedding(prediction.argmax(dim=-1))   
+
+            print(embed.shape, context.shape) 
             inp = torch.cat([embed,context], dim=1)
             hidden_states[0] = self.lstm1(inp,hidden_states[0])
             
