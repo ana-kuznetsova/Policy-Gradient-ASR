@@ -48,7 +48,6 @@ class Encoder(nn.Module):
             outputs = torch.mean(outputs, 2)
             outputs = torch.transpose(outputs,0,1)
             lens=lens//2
-            print("rnn inp:", outputs.shape)
             rnn_inp = pack_padded_sequence(outputs, lengths=lens, enforce_sorted=False)
             if i==0:
                 outputs, _ = self.pBLSTM1(rnn_inp)
@@ -58,9 +57,9 @@ class Encoder(nn.Module):
                 outputs, _ = self.pBLSTM3(rnn_inp)
             linear_input, _ = pad_packed_sequence(outputs)
         keys = self.key_network(linear_input)
-        value = self.value_network(linear_input)
+        values = self.value_network(linear_input)
 
-        return keys, value, lens
+        return keys, values
 
 corpus_path = '/nobackup/anakuzne/data/cv/cv-corpus-6.1-2020-12-11/eu'
 char2ind = preproc_text(corpus_path, 'eu')
@@ -77,4 +76,5 @@ encoder.to(device)
 for batch in loader_train:
     x = batch["feat"].to(device)
     xlens = batch['alens']
-    out = encoder(x, xlens)
+    keys, values = encoder(x, xlens)
+    print(keys.shape, values.shape)
