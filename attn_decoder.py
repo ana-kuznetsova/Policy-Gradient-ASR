@@ -57,6 +57,7 @@ class Decoder(nn.Module):
         batch_size=key.shape[1]
         if(train):
             text=torch.transpose(text,0,1)
+            print(text)
             max_len=text.shape[1]
             embeddings=self.embedding(text)
         else:
@@ -104,6 +105,7 @@ device ="cuda:1"
 encoder = Encoder(120, 256)
 decoder = Decoder(len(char2ind), 512)
 encoder.to(device)
+decoder.to(device)
 
 for batch in loader_train:
     x = batch["feat"].to(device)
