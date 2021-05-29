@@ -61,7 +61,8 @@ class Decoder(nn.Module):
             embeddings=self.embedding(text)
         else:
             max_len = 200
-            predictions = []
+        
+        predictions = []
 
         hidden_states = [None, None]
         prediction = torch.zeros(batch_size, 1).to(device)
@@ -75,7 +76,6 @@ class Decoder(nn.Module):
                     embed = embeddings[:,i,:]
             else:
                 embed = self.embedding(prediction.argmax(dim=-1))    
-            print("embedding:", embed.shape) 
             inp = torch.cat([embed,context], dim=1)
             hidden_states[0] = self.lstm1(inp,hidden_states[0])
             
