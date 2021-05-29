@@ -38,6 +38,7 @@ class Encoder(nn.Module):
     def forward(self, x, lens):
         x = torch.transpose(x, 1, -1)
         linear_input = self.input_layer(x)
+        print("inp layer:", linear_input.shape)
         linear_input = self.relu(x)
         print("lin input:", linear_input.shape)
         for i in range(3):
