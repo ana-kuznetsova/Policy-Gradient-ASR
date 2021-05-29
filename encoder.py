@@ -38,9 +38,7 @@ class Encoder(nn.Module):
     def forward(self, x, lens):
         x = torch.transpose(x, 1, -1)
         linear_input = self.input_layer(x)
-        print("inp layer:", linear_input.shape)
         linear_input = self.relu(linear_input)
-        print("lin input:", linear_input.shape)
         for i in range(3):
             if linear_input.shape[0]%2!=0:
                 linear_input = linear_input[:-1,:,:]
@@ -49,6 +47,7 @@ class Encoder(nn.Module):
             outputs = torch.mean(outputs, 2)
             outputs = torch.transpose(outputs,0,1)
             lens=lens//2
+            print("rnn inp:", outputs.shape)
             rnn_inp = pack_padded_sequence(outputs, lengths=lens, enforce_sorted=False)
             if i==0:
                 outputs, _ = self.pBLSTM1(rnn_inp)
