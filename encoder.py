@@ -36,6 +36,7 @@ class Encoder(nn.Module):
         self.value_network = nn.Linear(hidden_dim*2, key_size)
 
     def forward(self, x, lens):
+        print("inp:", x.shape)
         linear_input = self.input_layer(x)
         linear_input = self.relu(x)
         print("lin input:", linear_input.shape)
