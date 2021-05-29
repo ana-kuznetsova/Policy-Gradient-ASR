@@ -74,6 +74,7 @@ class Decoder(nn.Module):
                     embed = self.embedding(prediction.argmax(dim=-1))
                     print("embed1", embed.shape)
                 else:
+                    print("embeddings:", embeddings.shape)
                     embed = embeddings[:,i,:]
                     print("embed2:", embed.shape)
             else:
